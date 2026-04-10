@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer() {
   return (
     <footer className="bg-azure text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 pt-8 pb-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
@@ -58,15 +58,8 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom strip with icons */}
-        <div className="mt-8 pt-6 border-t border-blue-400/30 flex flex-col items-center gap-3">
-          <div className="flex items-end justify-center gap-6 brightness-150">
-            <img src="/images/icons/longhorn_skull_icon.png" alt="" className="h-8" aria-hidden="true" />
-            <img src="/images/icons/cactus_small_icon.png" alt="" className="h-9" aria-hidden="true" />
-            <img src="/images/icons/capitol_sunburst_icon.png" alt="" className="h-8" aria-hidden="true" />
-            <img src="/images/icons/armadillo_icon.png" alt="" className="h-7" aria-hidden="true" />
-            <img src="/images/icons/bluebonnet_star_icon.png" alt="" className="h-9" aria-hidden="true" />
-          </div>
+        {/* Copyright */}
+        <div className="mt-6 pt-4 border-t border-blue-400/30 text-center">
           <p className="text-xs text-blue-200">
             &copy; 2026 Amplify Good &middot; Austin, TX &middot; ACL Festival
             Meets Local Community
