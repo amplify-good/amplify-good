@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { signupLogin } from "@/lib/auth";
 
 type Role = "musician" | "nonprofit" | "community";
 
@@ -329,6 +330,12 @@ export default function SignUpForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const demoEmails: Record<string, string> = {
+      musician: "music@gmail.com",
+      nonprofit: "npo@gmail.com",
+      community: "fan@gmail.com",
+    };
+    signupLogin(role, demoEmails[role]);
     router.push(`/dashboard?role=${role}`);
   };
 

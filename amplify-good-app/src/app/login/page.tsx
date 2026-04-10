@@ -5,16 +5,28 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { login, DEMO_ACCOUNTS } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Demo only — redirect to dashboard as a community member by default
-    router.push("/home");
+    setError("");
+
+    const role = login(email);
+    if (!role) {
+      setError("Demo accounts: music@gmail.com, npo@gmail.com, or fan@gmail.com (any password)");
+      return;
+    }
+
+    // Redirect based on role
+    if (role === "musician") router.push("/dashboard?role=musician");
+    else if (role === "nonprofit") router.push("/dashboard?role=nonprofit");
+    else router.push("/home");
   };
 
   const inputClass =
@@ -48,6 +60,22 @@ export default function LoginPage() {
               </p>
             </div>
 
+            {/* Demo account hint */}
+            <div className="card !bg-parchment mb-6 text-xs font-body text-gray-600">
+              <p className="font-heading font-semibold text-azure text-sm mb-2">Demo Accounts</p>
+              {DEMO_ACCOUNTS.map((a) => (
+                <button
+                  key={a.email}
+                  type="button"
+                  onClick={() => { setEmail(a.email); setError(""); }}
+                  className="block w-full text-left py-1 hover:text-azure cursor-pointer transition-colors"
+                >
+                  <span className="font-semibold">{a.email}</span>
+                  <span className="text-gray-400 ml-2">— {a.name} ({a.role})</span>
+                </button>
+              ))}
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email */}
               <div>
@@ -58,11 +86,11 @@ export default function LoginPage() {
                   id="login-email"
                   type="email"
                   autoComplete="email"
-                  placeholder="you@example.com"
+                  placeholder="music@gmail.com"
                   required
                   className={inputClass}
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setError(""); }}
                 />
               </div>
 
@@ -80,13 +108,18 @@ export default function LoginPage() {
                   id="login-password"
                   type="password"
                   autoComplete="current-password"
-                  placeholder="Your password"
+                  placeholder="Any password works"
                   required
                   className={inputClass}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+
+              {/* Error */}
+              {error && (
+                <p className="text-sm text-sienna font-body">{error}</p>
+              )}
 
               {/* Submit */}
               <button type="submit" className="btn-primary w-full text-center mt-2">
