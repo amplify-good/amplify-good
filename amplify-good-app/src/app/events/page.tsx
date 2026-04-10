@@ -8,36 +8,8 @@ import { events, Event } from "@/data/events";
 import { nonprofits } from "@/data/nonprofits";
 import { musicians, allGenres } from "@/data/musicians";
 import { allCauses } from "@/data/nonprofits";
+import { formatDate, formatTime } from "@/lib/format";
 
-function formatDate(dateTime: string): string {
-  const date = new Date(dateTime);
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatTime(dateTime: string): string {
-  const date = new Date(dateTime);
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
-function causeColor(cause: string): string {
-  const map: Record<string, string> = {
-    Healthcare: "bg-turquoise text-white",
-    Youth: "bg-purple text-white",
-    Environment: "bg-green text-white",
-    "Animal Rescue": "bg-sienna text-white",
-    "Arts & Culture": "bg-gold text-foreground",
-  };
-  return map[cause] ?? "bg-azure text-white";
-}
 
 export default function EventsPage() {
   const [genreFilter, setGenreFilter] = useState("");

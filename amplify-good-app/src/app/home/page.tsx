@@ -5,29 +5,7 @@ import { events } from "@/data/events";
 import { musicians } from "@/data/musicians";
 import { nonprofits } from "@/data/nonprofits";
 import { bookings, impactPool } from "@/data/bookings";
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatDate(dateTime: string): string {
-  const date = new Date(dateTime);
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatTime(dateTime: string): string {
-  const date = new Date(dateTime);
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
-// ── Page ─────────────────────────────────────────────────────────────────────
+import { formatDate, formatTime } from "@/lib/format";
 
 export default function HomePage() {
   // Show only upcoming events in the feed, sorted soonest first
@@ -297,7 +275,7 @@ export default function HomePage() {
                 {/* CTA */}
                 <div className="mt-auto pt-2">
                   <Link
-                    href="/musicians"
+                    href={`/book/${musician.id}`}
                     className="btn-primary block text-center !py-2 !px-4 text-sm"
                   >
                     Book Now
@@ -332,22 +310,24 @@ export default function HomePage() {
           </p>
 
           {/* Logo row */}
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
             {nonprofits.map((np) => (
               <a
                 key={np.id}
                 href={np.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex flex-col items-center gap-2 opacity-80 hover:opacity-100 transition-opacity"
+                className="group flex flex-col items-center gap-3 hover:scale-105 transition-transform"
                 aria-label={np.name}
               >
-                <img
-                  src={np.logoUrl}
-                  alt={np.name}
-                  className="h-14 w-auto object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
-                />
-                <span className="font-heading font-semibold text-xs text-gray-500 group-hover:text-azure transition-colors text-center max-w-[100px]">
+                <div className="h-14 w-14 flex items-center justify-center">
+                  <img
+                    src={np.logoUrl}
+                    alt={np.name}
+                    className="max-h-full max-w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
+                  />
+                </div>
+                <span className="font-heading font-semibold text-xs text-gray-500 group-hover:text-azure transition-colors text-center leading-tight">
                   {np.name}
                 </span>
               </a>

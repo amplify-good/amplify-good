@@ -5,21 +5,9 @@ import { nonprofits } from "@/data/nonprofits";
 import { events } from "@/data/events";
 import { bookings, impactPool } from "@/data/bookings";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { formatDate, formatMoney } from "@/lib/format";
 
-function formatMoney(n: number) {
-  return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-// ─── Status text color (no rounded pill — per design rules) ──────────────────
+// ─── Status text color ──────────────────────────────────────────────────────
 
 function statusColor(status: string): string {
   switch (status) {

@@ -10,6 +10,7 @@ const EMAIL_ROLE_MAP: Record<string, Role> = {
   "music@gmail.com": "musician",
   "npo@gmail.com": "nonprofit",
   "fan@gmail.com": "community",
+  "event@gmail.com": "community",
 };
 
 /** Log in — returns the role if email matches, null otherwise */
@@ -29,12 +30,14 @@ export function signupLogin(role: Role, email: string) {
   Cookies.set(EMAIL_COOKIE, email.trim().toLowerCase(), { expires: 7 });
 }
 
+const VALID_ROLES: Role[] = ["musician", "nonprofit", "community"];
+
 /** Get current session */
 export function getSession(): { role: Role; email: string } | null {
-  const role = Cookies.get(COOKIE_KEY) as Role | undefined;
+  const rawRole = Cookies.get(COOKIE_KEY);
   const email = Cookies.get(EMAIL_COOKIE);
-  if (!role || !email) return null;
-  return { role, email };
+  if (!rawRole || !email || !VALID_ROLES.includes(rawRole as Role)) return null;
+  return { role: rawRole as Role, email };
 }
 
 /** Log out */
@@ -49,6 +52,7 @@ export function getDisplayName(email: string): string {
     "music@gmail.com": "Los Topo Chicos",
     "npo@gmail.com": "Austin Food Bank",
     "fan@gmail.com": "Rachel Torres",
+    "event@gmail.com": "David Chen",
   };
   return map[email] || email;
 }
@@ -58,4 +62,5 @@ export const DEMO_ACCOUNTS = [
   { email: "music@gmail.com", role: "musician" as Role, name: "Los Topo Chicos" },
   { email: "npo@gmail.com", role: "nonprofit" as Role, name: "Austin Food Bank" },
   { email: "fan@gmail.com", role: "community" as Role, name: "Rachel Torres" },
+  { email: "event@gmail.com", role: "community" as Role, name: "David Chen" },
 ];

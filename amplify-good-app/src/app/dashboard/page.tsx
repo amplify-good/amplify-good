@@ -3,35 +3,14 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { musicians } from "@/data/musicians";
 import { nonprofits } from "@/data/nonprofits";
 import { events } from "@/data/events";
 import { bookings } from "@/data/bookings";
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
-
-function formatMoney(n: number) {
-  return n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-}
+import { getSession } from "@/lib/auth";
+import { formatDate, formatTime, formatMoney } from "@/lib/format";
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
@@ -303,13 +282,6 @@ function MusicianDashboard() {
           </div>
         </div>
       </section>
-
-      {/* Quick Link */}
-      <div className="pt-2">
-        <Link href="/musicians/m1" className="btn-secondary">
-          Edit Profile
-        </Link>
-      </div>
     </div>
   );
 }
@@ -573,7 +545,11 @@ function CommunityDashboard() {
 
 function DashboardInner() {
   const searchParams = useSearchParams();
-  const role = searchParams.get("role");
+  const paramRole = searchParams.get("role");
+
+  // Use URL param first, fall back to cookie session
+  const session = getSession();
+  const role = paramRole || session?.role;
 
   if (role === "musician") return <MusicianDashboard />;
   if (role === "nonprofit") return <NonProfitDashboard />;

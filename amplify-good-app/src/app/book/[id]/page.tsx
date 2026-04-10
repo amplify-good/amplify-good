@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,7 +18,7 @@ const DURATION_OPTIONS = [
 
 export default function BookingPage() {
   const params = useParams();
-  const id = params?.id as string;
+  const id = String(params?.id ?? "");
 
   const musician = musicians.find((m) => m.id === id);
 

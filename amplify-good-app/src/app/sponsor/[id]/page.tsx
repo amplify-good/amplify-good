@@ -2,32 +2,17 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { musicians } from "@/data/musicians";
 import { events } from "@/data/events";
 import { nonprofits } from "@/data/nonprofits";
-
-function formatDate(dateTimeStr: string) {
-  const d = new Date(dateTimeStr);
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
-function formatTime(dateTimeStr: string) {
-  const d = new Date(dateTimeStr);
-  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-}
+import { formatDate, formatTime } from "@/lib/format";
 
 export default function SponsorPage() {
   const params = useParams();
-  const eventId = params?.id as string;
+  const eventId = String(params?.id ?? "");
 
   const event = events.find((e) => e.id === eventId);
   const musician = event?.musicianId
@@ -187,7 +172,6 @@ export default function SponsorPage() {
                         src={musician.photoUrl}
                         alt={musician.name}
                         className="w-full h-full object-contain"
-                        onError={() => {}}
                       />
                     </div>
                     <div className="flex-1">

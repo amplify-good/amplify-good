@@ -69,6 +69,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Demo Accounts
+
+Log in with any of these emails (any password works):
+
+| Email | Role | Logs in as |
+|-------|------|-----------|
+| `music@gmail.com` | Musician | Los Topo Chicos |
+| `npo@gmail.com` | Non-Profit | Austin Food Bank |
+| `fan@gmail.com` | Community | Rachel Torres |
+| `event@gmail.com` | Community | David Chen |
+
+Open [http://localhost:3000](http://localhost:3000).
+
 ---
 
 ## Brand & Design

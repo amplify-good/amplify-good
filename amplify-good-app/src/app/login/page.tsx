@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { login, DEMO_ACCOUNTS } from "@/lib/auth";
+import { login } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,22 +60,6 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* Demo account hint */}
-            <div className="card !bg-parchment mb-6 text-xs font-body text-gray-600">
-              <p className="font-heading font-semibold text-azure text-sm mb-2">Demo Accounts</p>
-              {DEMO_ACCOUNTS.map((a) => (
-                <button
-                  key={a.email}
-                  type="button"
-                  onClick={() => { setEmail(a.email); setError(""); }}
-                  className="block w-full text-left py-1 hover:text-azure cursor-pointer transition-colors"
-                >
-                  <span className="font-semibold">{a.email}</span>
-                  <span className="text-gray-400 ml-2">— {a.name} ({a.role})</span>
-                </button>
-              ))}
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email */}
               <div>
@@ -86,7 +70,7 @@ export default function LoginPage() {
                   id="login-email"
                   type="email"
                   autoComplete="email"
-                  placeholder="music@gmail.com"
+                  placeholder="you@example.com"
                   required
                   className={inputClass}
                   value={email}
@@ -108,7 +92,7 @@ export default function LoginPage() {
                   id="login-password"
                   type="password"
                   autoComplete="current-password"
-                  placeholder="Any password works"
+                  placeholder="Enter your password"
                   required
                   className={inputClass}
                   value={password}

@@ -32,8 +32,8 @@ export default function LandingPage() {
   return (
     <main className="sm:h-screen flex flex-col min-h-screen relative">
       {/* Decorative corner accents — subtle, festival-poster style */}
-      <img src="/images/icons/cactus_small_icon.png" alt="" className="absolute bottom-16 left-6 h-16 hidden sm:block" aria-hidden="true" />
-      <img src="/images/icons/armadillo_icon.png" alt="" className="absolute bottom-16 right-6 h-12 hidden sm:block" aria-hidden="true" />
+      <img src="/images/icons/armadillo_icon.png" alt="" className="absolute bottom-16 left-6 h-12 hidden sm:block" aria-hidden="true" />
+      <img src="/images/icons/cactus_small_icon.png" alt="" className="absolute bottom-16 right-6 h-16 hidden sm:block" aria-hidden="true" />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-6 relative z-10">
@@ -106,11 +106,9 @@ export default function LandingPage() {
         </p>
       </div>
 
-      {/* Bottom banner bar with skyline */}
-      <div className="banner-bar flex items-center justify-center gap-3">
-        <img src="/images/icons/austin_skyline_icon.png" alt="" className="h-5" aria-hidden="true" />
-        <span>Built for ATX &nbsp;|&nbsp; Amplify the Good City-Wide</span>
-        <img src="/images/icons/austin_skyline_icon.png" alt="" className="h-5 -scale-x-100" aria-hidden="true" />
+      {/* Bottom banner bar */}
+      <div className="banner-bar">
+        Built for ATX &nbsp;|&nbsp; Amplify the Good City-Wide
       </div>
     </main>
   );

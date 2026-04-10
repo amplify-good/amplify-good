@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -327,11 +326,12 @@ function SuggestedMusicianCard({ musician }: { musician: Musician }) {
         {musician.name}
       </h4>
 
-      {/* Genre pills — fixed height for alignment */}
+      {/* Genres */}
       <div className="flex flex-wrap justify-center gap-1 min-h-[2rem] items-center">
-        {musician.genres.map((genre) => (
-          <span key={genre} className="genre-pill text-xs">
-            {genre}
+        {musician.genres.map((genre, i) => (
+          <span key={genre} className="flex items-center gap-1">
+            <span className="genre-pill text-xs">{genre}</span>
+            {i < musician.genres.length - 1 && <span className="text-gold font-bold text-xs">|</span>}
           </span>
         ))}
       </div>
