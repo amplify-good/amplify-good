@@ -1,65 +1,117 @@
 import Image from "next/image";
+import Link from "next/link";
 
-export default function Home() {
+const roles = [
+  {
+    icon: "/images/icons/guitar_icon.png",
+    title: "I'm a Musician",
+    description: "Create your profile, set your rate, and get booked.",
+    href: "/signup?role=musician",
+    accent: "border-t-4 border-t-sienna",
+    btnClass: "btn-primary",
+  },
+  {
+    icon: "/images/icons/hands_heart_window_icon.png",
+    title: "I'm a Non-Profit",
+    description: "Post events and get matched with musicians at zero cost.",
+    href: "/signup?role=nonprofit",
+    accent: "border-t-4 border-t-azure",
+    btnClass: "btn-secondary",
+  },
+  {
+    icon: "/images/icons/music_notes_icon.png",
+    title: "I Need a Musician",
+    description: "Browse events, book musicians, or sponsor a set.",
+    href: "/signup?role=community",
+    accent: "border-t-4 border-t-orange",
+    btnClass: "btn-primary",
+  },
+];
+
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="sm:h-screen flex flex-col min-h-screen relative">
+      {/* Decorative corner accents — subtle, festival-poster style */}
+      <img src="/images/icons/cactus_small_icon.png" alt="" className="absolute bottom-16 left-6 h-16 hidden sm:block" aria-hidden="true" />
+      <img src="/images/icons/armadillo_icon.png" alt="" className="absolute bottom-16 right-6 h-12 hidden sm:block" aria-hidden="true" />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-6 relative z-10">
+        {/* Logo */}
+        <img
+          src="/images/logo.png"
+          alt="Amplify Good — fist holding microphone with lightning bolt"
+          className="h-52 sm:h-60 w-auto object-contain drop-shadow-lg mb-2"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl uppercase text-azure tracking-wide">
+          Amplify Good
+        </h1>
+
+        <p className="font-heading text-base sm:text-lg text-sienna font-semibold tracking-wide max-w-xl text-center mt-2">
+          Where Wealth Preserves Art &amp; Art Drives Social Impact
+        </p>
+
+        {/* Decorative divider — guitar + lines */}
+        <div className="flex items-center gap-4 my-5">
+          <div className="h-px w-24 sm:w-40 bg-sienna/40" />
+          <Image
+            src="/images/icons/impact_star_icon.png"
+            alt=""
+            width={40}
+            height={40}
+            aria-hidden="true"
+          />
+          <div className="h-px w-24 sm:w-40 bg-sienna/40" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Role Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl">
+          {roles.map((role) => (
+            <div
+              key={role.title}
+              className={`card flex flex-col items-center text-center px-5 pb-5 pt-6 ${role.accent}`}
+            >
+              <div className="h-16 flex items-center justify-center mb-3">
+                <img
+                  src={role.icon}
+                  alt={role.title}
+                  className="max-h-full max-w-[60px] object-contain"
+                />
+              </div>
+
+              <h2 className="font-heading text-lg font-bold text-azure mb-1">
+                {role.title}
+              </h2>
+
+              <p className="text-xs text-gray-600 leading-relaxed flex-1 mb-3">
+                {role.description}
+              </p>
+
+              <Link href={role.href} className={`${role.btnClass} inline-block mt-auto !py-2 !px-6 text-sm`}>
+                Get Started
+              </Link>
+            </div>
+          ))}
         </div>
-      </main>
-    </div>
+
+        {/* Login link */}
+        <p className="mt-4 text-sm text-gray-600">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-semibold text-azure hover:text-sienna transition-colors underline underline-offset-2"
+          >
+            Log in
+          </Link>
+        </p>
+      </div>
+
+      {/* Bottom banner bar with skyline */}
+      <div className="banner-bar flex items-center justify-center gap-3">
+        <img src="/images/icons/austin_skyline_icon.png" alt="" className="h-5" aria-hidden="true" />
+        <span>Built for ATX &nbsp;|&nbsp; Amplify the Good City-Wide</span>
+        <img src="/images/icons/austin_skyline_icon.png" alt="" className="h-5 -scale-x-100" aria-hidden="true" />
+      </div>
+    </main>
   );
 }

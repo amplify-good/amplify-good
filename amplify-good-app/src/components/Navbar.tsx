@@ -13,12 +13,10 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/images/logo.png"
+            <img
+              src="/images/fist-logo.png"
               alt="Amplify Good"
-              width={40}
-              height={40}
-              className="rounded-full"
+              className="h-10 w-auto object-contain"
             />
             <span className="font-display text-xl tracking-wide uppercase">
               Amplify Good

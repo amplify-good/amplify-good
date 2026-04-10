@@ -13,8 +13,14 @@
   --gold: #FBB03B;
   --green: #348F41;
 
+  /* Sandy / Warm Backgrounds (matched to Canva brand guides) */
+  --sand: #E8DCBE;
+  --sand-light: #F2EADA;
+  --sand-dark: #D9CCAB;
+  --parchment: #E3D7BA;
+
   /* Semantic */
-  --background: #DFEEFB;
+  --background: #E8DCBE;
   --foreground: #1a1a2e;
 }
 
@@ -29,6 +35,10 @@
   --color-purple: var(--purple);
   --color-gold: var(--gold);
   --color-green: var(--green);
+  --color-sand: var(--sand);
+  --color-sand-light: var(--sand-light);
+  --color-sand-dark: var(--sand-dark);
+  --color-parchment: var(--parchment);
 
   --font-display: "Anton", sans-serif;
   --font-heading: "League Spartan", "Montserrat", sans-serif;
@@ -36,9 +46,11 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(ellipse at center, var(--sand-light) 0%, var(--sand) 60%, var(--sand-dark) 100%);
   color: var(--foreground);
   font-family: var(--font-body);
+  min-height: 100vh;
 }
 
 /* Anton for hero/display headings */
@@ -52,23 +64,25 @@ body {
   font-family: var(--font-heading);
 }
 
-/* Festival button styles */
+/* Festival button styles — wristband / backstage pass feel */
 .btn-primary {
   background-color: var(--orange);
   color: #1a1a2e;
   font-family: var(--font-heading);
   font-weight: 700;
   padding: 0.75rem 2rem;
-  border-radius: 9999px;
+  border-radius: 0.5rem;
   transition: all 0.2s;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  border: 2px solid transparent;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
   background-color: #e6a500;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 183, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 183, 0, 0.45);
 }
 
 .btn-secondary {
@@ -77,11 +91,12 @@ body {
   font-family: var(--font-heading);
   font-weight: 700;
   padding: 0.75rem 2rem;
-  border-radius: 9999px;
+  border-radius: 0.5rem;
   transition: all 0.2s;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: transparent;
+  cursor: pointer;
 }
 
 .btn-secondary:hover {
@@ -89,33 +104,59 @@ body {
   color: white;
 }
 
-/* Genre tag pills */
+/* Genre tags — plain text style, no badge */
 .genre-pill {
-  display: inline-block;
-  background-color: var(--light-blue);
+  display: inline-flex;
+  align-items: center;
   color: var(--azure);
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1;
 }
 
-/* Card style */
+/* Card style — warm paper feel */
 .card {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--sand-light);
+  border: 1.5px solid var(--gold);
   border-radius: 1rem;
   padding: 1.5rem;
   transition: box-shadow 0.2s;
 }
 
 .card:hover {
-  box-shadow: 0 8px 24px rgba(33, 99, 159, 0.12);
+  box-shadow: 0 8px 24px rgba(191, 87, 0, 0.1);
 }
 
 /* Impact/financial numbers */
 .impact-number {
   color: var(--gold);
   font-family: var(--font-display);
+}
+
+/* Warm sandy section backgrounds */
+.bg-warm {
+  background: linear-gradient(180deg, var(--sand-light) 0%, var(--sand) 100%);
+}
+
+/* Azure banner bar (like the Canva "BUILT FOR ATX" footer strip) */
+.banner-bar {
+  background-color: var(--azure);
+  color: white;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+}
+
+/* Sunburst decorative corner accent */
+.sunburst-corner {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  opacity: 0.6;
+  pointer-events: none;
 }
