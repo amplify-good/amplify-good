@@ -80,14 +80,9 @@ export default function LoginPage() {
 
               {/* Password */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="login-password" className={labelClass}>
-                    Password
-                  </label>
-                  <button type="button" className="text-xs text-azure hover:underline cursor-pointer font-body">
-                    Forgot password?
-                  </button>
-                </div>
+                <label htmlFor="login-password" className={labelClass}>
+                  Password
+                </label>
                 <input
                   id="login-password"
                   type="password"
@@ -110,6 +105,13 @@ export default function LoginPage() {
                 Log In
               </button>
             </form>
+
+            {/* Forgot password — after form so tab order is Email → Password → Log In → Forgot */}
+            <div className="text-center mt-3">
+              <button type="button" className="text-xs text-azure hover:underline cursor-pointer font-body">
+                Forgot password?
+              </button>
+            </div>
 
             {/* Divider */}
             <div className="relative my-6">
