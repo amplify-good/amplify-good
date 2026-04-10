@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary Colors */
+  --azure: #21639F;
+  --sienna: #BF5700;
+  --orange: #FFB700;
+  --light-blue: #DFEEFB;
+
+  /* Extended Festival Palette */
+  --turquoise: #00A6A3;
+  --purple: #4D1378;
+  --gold: #FBB03B;
+  --green: #348F41;
+
+  /* Semantic */
+  --background: #DFEEFB;
+  --foreground: #1a1a2e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-azure: var(--azure);
+  --color-sienna: var(--sienna);
+  --color-orange: var(--orange);
+  --color-light-blue: var(--light-blue);
+  --color-turquoise: var(--turquoise);
+  --color-purple: var(--purple);
+  --color-gold: var(--gold);
+  --color-green: var(--green);
+
+  --font-display: "Anton", sans-serif;
+  --font-heading: "League Spartan", "Montserrat", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+/* Anton for hero/display headings */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+/* League Spartan / Montserrat for sub-headings */
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+/* Festival button styles */
+.btn-primary {
+  background-color: var(--orange);
+  color: #1a1a2e;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-primary:hover {
+  background-color: #e6a500;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 183, 0, 0.4);
+}
+
+.btn-secondary {
+  border: 2px solid var(--azure);
+  color: var(--azure);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+}
+
+.btn-secondary:hover {
+  background-color: var(--azure);
+  color: white;
+}
+
+/* Genre tag pills */
+.genre-pill {
+  display: inline-block;
+  background-color: var(--light-blue);
+  color: var(--azure);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+/* Card style */
+.card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: box-shadow 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px rgba(33, 99, 159, 0.12);
+}
+
+/* Impact/financial numbers */
+.impact-number {
+  color: var(--gold);
+  font-family: var(--font-display);
+}
