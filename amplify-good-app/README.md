@@ -1,36 +1,148 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Amplify Good — Developer README
 
-## Getting Started
+Frontend-only Next.js prototype for the Amplify Good three-sided marketplace.
 
-First, run the development server:
+## Stack
+
+| Layer | Technology |
+| ----- | ---------- |
+| Framework | Next.js 16 (App Router) |
+| Styling | Tailwind CSS 4 with `@theme inline` CSS tokens |
+| Language | TypeScript |
+| Auth | Cookie-based demo auth via `js-cookie` |
+| Fonts | Anton, League Spartan, Open Sans (Google Fonts) |
+| Data | Static TypeScript seed files — no database |
+
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+src/
+  app/                  # Next.js App Router pages
+    page.tsx            # / — Landing
+    login/page.tsx      # /login
+    signup/page.tsx     # /signup
+    home/page.tsx       # /home — Community feed
+    musicians/
+      page.tsx          # /musicians — Directory
+      [id]/page.tsx     # /musicians/:id — Profile
+    events/
+      page.tsx          # /events — Listing
+      new/page.tsx      # /events/new — Create event
+      [id]/page.tsx     # /events/:id — Detail
+    dashboard/page.tsx  # /dashboard — Role dashboard
+    book/[id]/page.tsx  # /book/:id — Booking + checkout
+    sponsor/[id]/page.tsx # /sponsor/:id — Sponsor a set
+    admin/page.tsx      # /admin — Admin panel
+    globals.css         # Tailwind 4 + design tokens + base styles
+    layout.tsx          # Root layout (fonts, metadata)
+  components/
+    Navbar.tsx          # Sticky nav with session-aware login/logout
+    Footer.tsx          # Site footer
+    GenreTags.tsx       # Pipe-separated genre display
+    SectionDivider.tsx  # Decorative section separator
+  data/
+    musicians.ts        # 5 musician records
+    nonprofits.ts       # 5 nonprofit records
+    events.ts           # 7 event records
+    bookings.ts         # 9 booking records + impactPool object
+  lib/
+    auth.ts             # Cookie auth — login, logout, getSession, getDisplayName
+    format.ts           # Shared utilities — formatDate, formatTime, formatMoney
+public/
+  images/
+    fist-logo.png       # Primary logo (microphone fist)
+    icons/              # Hand-drawn brand illustration kit
+    musicians/          # Musician placeholder photos
+    nonprofits/         # Nonprofit logo placeholders
+```
 
-## Learn More
+## Authentication
 
-To learn more about Next.js, take a look at the following resources:
+No real auth — uses `js-cookie` to store two cookies: `ampgood_role` and `ampgood_email`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**`src/lib/auth.ts`** exports:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `login(email)` — checks email against hardcoded map, sets cookies, returns role or null
+- `logout()` — removes both cookies
+- `getSession()` — reads cookies, returns `{ role, email }` or null
+- `getDisplayName(email)` — maps email to display name
 
-## Deploy on Vercel
+Demo accounts (any password):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Email | Role | Display Name |
+| ----- | ---- | ------------ |
+| `music@gmail.com` | musician | Los Topo Chicos |
+| `npo@gmail.com` | nonprofit | Austin Food Bank |
+| `fan@gmail.com` | community | Rachel Torres |
+| `event@gmail.com` | community | David Chen |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The Navbar reads the session via `getSession()` on mount and shows the user's display name + logout button when logged in.
+
+## Seed Data
+
+All data lives in `src/data/`. No database, no API calls — everything is imported directly into pages.
+
+- **`musicians.ts`** — 5 musicians with id, name, genre, rate, bio, media, socials
+- **`nonprofits.ts`** — 5 nonprofits with id, name, mission, cause, logo
+- **`events.ts`** — 7 events with status (upcoming/draft/completed), musicianId, nonprofitId
+- **`bookings.ts`** — 9 bookings covering all 5 musicians; also exports `impactPool` object
+
+Impact pool shape:
+
+```typescript
+export const impactPool = {
+  balance: 685,
+  totalInflows: 1835,
+  totalOutflows: 1150,
+};
+```
+
+## Design Tokens
+
+CSS custom properties defined in `globals.css` and exposed via `@theme inline`:
+
+```css
+--color-azure: #21639F       /* Primary brand */
+--color-sienna: #BF5700      /* Secondary accent */
+--color-orange: #FFB700      /* Action buttons */
+--color-gold: #FBB03B        /* Impact numbers */
+--color-sand: #E8DCBE        /* Page background */
+--color-sand-light: #F2EADA
+--color-sand-dark: #D9CCAB
+--color-parchment: #E3D7BA
+```
+
+Use as Tailwind utilities: `bg-azure`, `text-orange`, `border-gold`, etc.
+
+## Shared Utilities
+
+**`src/lib/format.ts`**:
+
+- `formatDate(dateString)` — e.g. `"June 14, 2026"`
+- `formatTime(dateString)` — e.g. `"6:00 PM"`
+- `formatMoney(amount)` — e.g. `"$1,835.00"`
+
+## Static Generation
+
+Pages with dynamic routes (`/musicians/[id]`, `/events/[id]`, `/book/[id]`, `/sponsor/[id]`) use `generateStaticParams()` to export all routes at build time.
+
+## Deployment
+
+Deploy to Vercel. Set the **Root Directory** to `amplify-good-app` in the Vercel project settings (the monorepo root is not the Next.js app).
+
+```text
+Root Directory: amplify-good-app
+Build Command:  npm run build  (default)
+Output:         .next          (default)
+```
+
+No environment variables required — this is a fully static frontend prototype.
