@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import GenreTags from "@/components/GenreTags";
 import { musicians } from "@/data/musicians";
 import { events } from "@/data/events";
 import { nonprofits } from "@/data/nonprofits";
@@ -178,13 +179,7 @@ export default function SponsorPage() {
                       <h4 className="font-heading text-xl font-bold text-azure">
                         {musician.name}
                       </h4>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {musician.genres.map((genre) => (
-                          <span key={genre} className="genre-pill">
-                            {genre}
-                          </span>
-                        ))}
-                      </div>
+                      <GenreTags genres={musician.genres} className="mt-1" />
                       <div className="flex items-baseline gap-1 mt-2">
                         <span className="impact-number text-2xl">${musician.rate}</span>
                         <span className="font-body text-xs text-gray-500">

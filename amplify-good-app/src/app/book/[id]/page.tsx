@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import GenreTags from "@/components/GenreTags";
 import { musicians } from "@/data/musicians";
 
 const IMPACT_COMMISSION = 0.15;
@@ -132,13 +133,7 @@ export default function BookingPage() {
                 </h2>
 
                 {/* Genre pills */}
-                <div className="flex flex-wrap justify-center gap-2">
-                  {musician.genres.map((genre) => (
-                    <span key={genre} className="genre-pill">
-                      {genre}
-                    </span>
-                  ))}
-                </div>
+                <GenreTags genres={musician.genres} className="justify-center" />
 
                 {/* Rate */}
                 <div className="flex items-baseline gap-1 mt-1">

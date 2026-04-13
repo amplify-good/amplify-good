@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import GenreTags from "@/components/GenreTags";
 import { musicians, allGenres } from "@/data/musicians";
 import type { Musician } from "@/data/musicians";
 
@@ -327,14 +328,7 @@ function SuggestedMusicianCard({ musician }: { musician: Musician }) {
       </h4>
 
       {/* Genres */}
-      <div className="flex flex-wrap justify-center gap-1 min-h-[2rem] items-center">
-        {musician.genres.map((genre, i) => (
-          <span key={genre} className="flex items-center gap-1">
-            <span className="genre-pill text-xs">{genre}</span>
-            {i < musician.genres.length - 1 && <span className="text-gold font-bold text-xs">|</span>}
-          </span>
-        ))}
-      </div>
+      <GenreTags genres={musician.genres} className="justify-center min-h-[2rem]" />
 
       {/* Rate */}
       <div className="flex items-baseline gap-1">

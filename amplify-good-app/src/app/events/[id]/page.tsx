@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import GenreTags from "@/components/GenreTags";
 import { events } from "@/data/events";
 import { nonprofits } from "@/data/nonprofits";
 import { musicians } from "@/data/musicians";
@@ -245,14 +246,7 @@ export default async function EventDetailPage({
                   <h3 className="font-heading font-bold text-lg text-gray-900">
                     {musician.name}
                   </h3>
-                  <div className="flex items-center flex-wrap gap-1 mt-1">
-                    {musician.genres.map((genre, i) => (
-                      <span key={genre} className="flex items-center gap-1">
-                        <span className="genre-pill text-xs">{genre}</span>
-                        {i < musician.genres.length - 1 && <span className="text-gold font-bold text-xs">|</span>}
-                      </span>
-                    ))}
-                  </div>
+                  <GenreTags genres={musician.genres} className="mt-1" />
                   <p className="font-body text-sm text-gray-600 mt-2 leading-relaxed line-clamp-3">
                     {musician.bio}
                   </p>

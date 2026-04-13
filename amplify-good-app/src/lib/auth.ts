@@ -56,11 +56,3 @@ export function getDisplayName(email: string): string {
   };
   return map[email] || email;
 }
-
-/** All demo accounts for reference */
-export const DEMO_ACCOUNTS = [
-  { email: "music@gmail.com", role: "musician" as Role, name: "Los Topo Chicos" },
-  { email: "npo@gmail.com", role: "nonprofit" as Role, name: "Austin Food Bank" },
-  { email: "fan@gmail.com", role: "community" as Role, name: "Rachel Torres" },
-  { email: "event@gmail.com", role: "community" as Role, name: "David Chen" },
-];
