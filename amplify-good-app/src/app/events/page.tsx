@@ -1,6 +1,7 @@
 import { getEvents } from "@/lib/db/events";
 import { getMusicians } from "@/lib/db/musicians";
 import { getNonprofits } from "@/lib/db/nonprofits";
+import { getUserRsvpEventIds } from "@/lib/db/rsvps";
 import EventsClient from "./EventsClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,10 +14,15 @@ export default async function EventsPage() {
     getMusicians(),
     getNonprofits(),
   ]);
+
+  const rsvpedEventIds = session
+    ? Array.from(await getUserRsvpEventIds(session.userId))
+    : [];
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar initialSession={session} />
-      <EventsClient events={events} musicians={musicians} nonprofits={nonprofits} />
+      <EventsClient events={events} musicians={musicians} nonprofits={nonprofits} rsvpedEventIds={rsvpedEventIds} />
       <Footer isLoggedIn={!!session} />
     </div>
   );

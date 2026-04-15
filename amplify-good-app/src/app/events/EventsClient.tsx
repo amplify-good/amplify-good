@@ -17,15 +17,25 @@ interface EventsClientProps {
   events: DbEvent[];
   musicians: DbMusician[];
   nonprofits: DbNonprofit[];
+  rsvpedEventIds?: string[];
 }
 
-export default function EventsClient({ events, musicians, nonprofits }: EventsClientProps) {
+export default function EventsClient({ events, musicians, nonprofits, rsvpedEventIds = [] }: EventsClientProps) {
+  const rsvpedSet = useMemo(() => new Set(rsvpedEventIds), [rsvpedEventIds]);
   const [genreFilter, setGenreFilter] = useState("");
   const [causeFilter, setCauseFilter] = useState("");
   const [keyword, setKeyword] = useState("");
+  const [myEventsOpen, setMyEventsOpen] = useState(true);
+  const [upcomingOpen, setUpcomingOpen] = useState(true);
+  const [pastOpen, setPastOpen] = useState(true);
 
-  const filtered = useMemo(() => {
-    return events.filter((event: DbEvent) => {
+  const myEvents = useMemo(
+    () => events.filter((e) => rsvpedSet.has(e.id) && e.status !== "completed"),
+    [events, rsvpedSet]
+  );
+
+  const { upcoming, past } = useMemo(() => {
+    const filtered = events.filter((event: DbEvent) => {
       const matchesGenre =
         !genreFilter || event.genre_pref === genreFilter;
       const matchesCause =
@@ -37,7 +47,12 @@ export default function EventsClient({ events, musicians, nonprofits }: EventsCl
         (event.description ?? "").toLowerCase().includes(kw);
       return matchesGenre && matchesCause && matchesKeyword;
     });
-  }, [events, genreFilter, causeFilter, keyword]);
+
+    return {
+      upcoming: filtered.filter((e) => e.status !== "completed" && !rsvpedSet.has(e.id)),
+      past: filtered.filter((e) => e.status === "completed"),
+    };
+  }, [events, genreFilter, causeFilter, keyword, rsvpedSet]);
 
   return (
     <main className="flex-1">
@@ -121,7 +136,43 @@ export default function EventsClient({ events, musicians, nonprofits }: EventsCl
 
       {/* Event Grid */}
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {filtered.length === 0 ? (
+        {/* My Events — collapsible, only shown when user has RSVPs */}
+        {myEvents.length > 0 && (
+          <section className="mb-10">
+            <button
+              onClick={() => setMyEventsOpen((o) => !o)}
+              className="flex items-center gap-3 w-full mb-4 cursor-pointer group/my"
+            >
+              <h2 className="font-display text-2xl uppercase text-sienna">
+                My Events
+              </h2>
+              <span className="font-body text-sm text-gray-400">
+                ({myEvents.length})
+              </span>
+              <div className="h-px flex-1 bg-sand-dark" />
+              <svg
+                className={`w-5 h-5 text-sienna transition-transform ${myEventsOpen ? "rotate-180" : ""}`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {myEventsOpen && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    nonprofit={nonprofits.find((np) => np.id === event.nonprofit_id)}
+                    musician={event.musician_id ? musicians.find((m) => m.id === event.musician_id) ?? null : null}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {upcoming.length === 0 && past.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-heading text-xl text-gray-400 font-semibold">
               No events found matching your filters.
@@ -139,19 +190,77 @@ export default function EventsClient({ events, musicians, nonprofits }: EventsCl
           </div>
         ) : (
           <>
-            <p className="font-body text-sm text-gray-500 mb-6">
-              Showing {filtered.length} event{filtered.length !== 1 ? "s" : ""}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((event) => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  nonprofit={nonprofits.find((np) => np.id === event.nonprofit_id)}
-                  musician={event.musician_id ? musicians.find((m) => m.id === event.musician_id) ?? null : null}
-                />
-              ))}
-            </div>
+            {/* Upcoming Events */}
+            {upcoming.length > 0 && (
+              <section>
+                <button
+                  onClick={() => setUpcomingOpen((o) => !o)}
+                  className="flex items-center gap-3 w-full mb-6 cursor-pointer"
+                >
+                  <h2 className="font-display text-2xl uppercase text-azure">
+                    Upcoming Events
+                  </h2>
+                  <span className="font-body text-sm text-gray-400">
+                    ({upcoming.length})
+                  </span>
+                  <div className="h-px flex-1 bg-sand-dark" />
+                  <svg
+                    className={`w-5 h-5 text-azure transition-transform ${upcomingOpen ? "rotate-180" : ""}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {upcomingOpen && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {upcoming.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        nonprofit={nonprofits.find((np) => np.id === event.nonprofit_id)}
+                        musician={event.musician_id ? musicians.find((m) => m.id === event.musician_id) ?? null : null}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Past Events */}
+            {past.length > 0 && (
+              <section className={upcoming.length > 0 ? "mt-14" : ""}>
+                <button
+                  onClick={() => setPastOpen((o) => !o)}
+                  className="flex items-center gap-3 w-full mb-6 cursor-pointer"
+                >
+                  <h2 className="font-display text-2xl uppercase text-azure">
+                    Past Events
+                  </h2>
+                  <span className="font-body text-sm text-gray-400">
+                    ({past.length})
+                  </span>
+                  <div className="h-px flex-1 bg-sand-dark" />
+                  <svg
+                    className={`w-5 h-5 text-azure transition-transform ${pastOpen ? "rotate-180" : ""}`}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {pastOpen && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80">
+                    {past.map((event) => (
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        nonprofit={nonprofits.find((np) => np.id === event.nonprofit_id)}
+                        musician={event.musician_id ? musicians.find((m) => m.id === event.musician_id) ?? null : null}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
           </>
         )}
       </div>

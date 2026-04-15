@@ -28,6 +28,17 @@ export async function getUserRsvp(
   return data
 }
 
+export async function getUserRsvpEventIds(userId: string): Promise<Set<string>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('rsvps')
+    .select('event_id')
+    .eq('user_id', userId)
+
+  if (error) throw new Error(`Failed to get user RSVPs: ${error.message}`)
+  return new Set((data ?? []).map((r) => r.event_id))
+}
+
 export async function createRsvp(eventId: string, userId: string): Promise<DbRsvp> {
   const supabase = await createClient()
   const { data, error } = await supabase

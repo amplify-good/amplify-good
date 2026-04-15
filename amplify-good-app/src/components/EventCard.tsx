@@ -2,6 +2,27 @@ import Link from "next/link";
 import type { DbEvent, DbNonprofit, DbMusician } from "@/lib/db/types";
 import { formatDate, formatTime } from "@/lib/format";
 
+const DECORATIVE_ICONS = [
+  "/images/icons/bluebonnet_star_icon.png",
+  "/images/icons/guitar_icon.png",
+  "/images/icons/music_notes_icon.png",
+  "/images/icons/armadillo_icon.png",
+  "/images/icons/cactus_small_icon.png",
+  "/images/icons/impact_star_icon.png",
+  "/images/icons/sun_icon_middle.png",
+  "/images/icons/capitol_sunburst_icon.png",
+  "/images/icons/desert_cactus_stars_icon.png",
+];
+
+function getIconForEvent(eventId: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < eventId.length; i++) {
+    h ^= eventId.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return DECORATIVE_ICONS[((h >>> 0) % DECORATIVE_ICONS.length)];
+}
+
 export default function EventCard({
   event,
   musician,
@@ -45,22 +66,32 @@ export default function EventCard({
           <span>{event.venue}</span>
         </div>
 
-        {nonprofit && (
-          <div className="text-sm font-body text-gray-500">
-            <span className="font-semibold text-gray-700">Hosted by:</span>{" "}
-            {nonprofit.name}
+        <div className="flex items-end">
+          <div className="flex flex-col gap-0.5 text-sm font-body">
+            {nonprofit && (
+              <div className="text-gray-500">
+                <span className="font-semibold text-gray-700">Hosted by:</span>{" "}
+                {nonprofit.name}
+              </div>
+            )}
+            <div>
+              {musician ? (
+                <span className="text-gray-600">
+                  <span className="font-semibold text-gray-700">Performing:</span>{" "}
+                  {musician.name}
+                </span>
+              ) : (
+                <span className="text-gray-400 italic">Musician TBD</span>
+              )}
+            </div>
           </div>
-        )}
-
-        <div className="text-sm font-body">
-          {musician ? (
-            <span className="text-gray-600">
-              <span className="font-semibold text-gray-700">Performing:</span>{" "}
-              {musician.name}
-            </span>
-          ) : (
-            <span className="text-gray-400 italic">Musician TBD</span>
-          )}
+          <div className="flex-1" />
+          <img 
+            src={getIconForEvent(event.id)} 
+            alt="" 
+            className="w-10 h-10 object-contain shrink-0" 
+            aria-hidden="true"
+          />
         </div>
 
         <div className="flex-1" />
