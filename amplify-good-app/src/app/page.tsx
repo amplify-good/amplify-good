@@ -37,13 +37,9 @@ export default async function LandingPage() {
   }
 
   return (
-    <main className="sm:h-screen flex flex-col min-h-screen relative">
-      {/* Decorative corner accents — subtle, festival-poster style */}
-      <img src="/images/icons/armadillo_icon.png" alt="" className="absolute bottom-16 left-6 h-12 hidden sm:block" aria-hidden="true" />
-      <img src="/images/icons/cactus_small_icon.png" alt="" className="absolute bottom-16 right-6 h-16 hidden sm:block" aria-hidden="true" />
-
+    <main className="sm:h-screen flex flex-col min-h-screen">
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-6 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 sm:py-6">
         {/* Logo */}
         <img
           src="/images/logo.png"
@@ -112,11 +108,26 @@ export default async function LandingPage() {
             Log in
           </Link>
         </p>
+
+        {/* Guest browsing */}
+        <p className="mt-2 text-sm text-gray-500">
+          Just browsing?{" "}
+          <Link
+            href="/home"
+            className="font-semibold text-azure hover:text-sienna transition-colors underline underline-offset-2"
+          >
+            Continue as a guest &rarr;
+          </Link>
+        </p>
       </div>
 
-      {/* Bottom banner bar */}
-      <div className="banner-bar">
-        Built for ATX &nbsp;|&nbsp; Amplify the Good City-Wide
+      {/* Decorative accents + bottom banner bar */}
+      <div className="relative">
+        <img src="/images/icons/armadillo_icon.png" alt="" className="absolute -top-14 left-6 h-12 hidden sm:block" aria-hidden="true" />
+        <img src="/images/icons/cactus_small_icon.png" alt="" className="absolute -top-18 right-6 h-16 hidden sm:block" aria-hidden="true" />
+        <div className="banner-bar">
+          Built for ATX &nbsp;|&nbsp; Amplify the Good City-Wide
+        </div>
       </div>
     </main>
   );

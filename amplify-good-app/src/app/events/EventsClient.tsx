@@ -148,7 +148,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
               <h2 className="font-display text-2xl uppercase text-sienna">
                 My Events
               </h2>
-              <span className="font-body text-sm text-gray-400">
+              <span className="font-body text-sm font-semibold text-sienna">
                 ({myEvents.length})
               </span>
               <div className="h-px flex-1 bg-sienna/40" />
@@ -238,7 +238,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
                   <h2 className="font-display text-2xl uppercase text-azure">
                     Past Events
                   </h2>
-                  <span className="font-body text-sm text-gray-400">
+                  <span className="font-body text-sm font-semibold text-sienna">
                     ({past.length})
                   </span>
                   <div className="h-px flex-1 bg-sienna/40" />
