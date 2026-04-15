@@ -84,7 +84,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
               placeholder="Search events..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              className="w-full border border-gray-200 rounded-full px-4 py-2 font-body text-sm focus:outline-none focus:ring-2 focus:ring-azure focus:border-transparent"
+              className="w-full border-2 border-azure rounded-full px-4 py-2 font-body text-sm focus:outline-none"
             />
           </div>
 
@@ -93,7 +93,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
             aria-label="Filter by genre"
             value={genreFilter}
             onChange={(e) => setGenreFilter(e.target.value)}
-            className="border border-gray-200 rounded-full pl-4 pr-10 py-2 font-body text-sm focus:outline-none focus:ring-2 focus:ring-azure bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+            className="border-2 border-azure rounded-full pl-4 pr-10 py-2 font-body text-sm focus:outline-none bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
           >
             <option value="">All Genres</option>
             {GENRE_LIST.map((g) => (
@@ -108,7 +108,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
             aria-label="Filter by cause"
             value={causeFilter}
             onChange={(e) => setCauseFilter(e.target.value)}
-            className="border border-gray-200 rounded-full pl-4 pr-10 py-2 font-body text-sm focus:outline-none focus:ring-2 focus:ring-azure bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+            className="border-2 border-azure rounded-full pl-4 pr-10 py-2 font-body text-sm focus:outline-none bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
           >
             <option value="">All Causes</option>
             {CAUSE_LIST.map((c) => (
