@@ -221,16 +221,21 @@ export default async function HomePage() {
 
         {/* ── Nonprofit Partner Logos ───────────────────────────────────── */}
         <section className="max-w-7xl mx-auto px-4 py-12">
-          <div className="flex items-center gap-3 mb-8">
-            <img
-              src="/images/icons/hands_heart_window_icon.png"
-              alt=""
-              aria-hidden="true"
-              className="h-8 w-auto object-contain"
-            />
-            <h2 className="font-display text-3xl uppercase text-azure">
-              Our Partners
-            </h2>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <img
+                src="/images/icons/hands_heart_window_icon.png"
+                alt=""
+                aria-hidden="true"
+                className="h-8 w-auto object-contain"
+              />
+              <h2 className="font-display text-3xl uppercase text-azure">
+                Our Partners
+              </h2>
+            </div>
+            <Link href="/donate" className="btn-primary py-2! px-5! text-sm">
+              Donate
+            </Link>
           </div>
 
           <p className="font-body text-gray-600 mb-8 max-w-2xl">
