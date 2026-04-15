@@ -34,13 +34,7 @@ export default function EventCard({
 }) {
   return (
     <Link href={`/events/${event.id}`} className="block group">
-      <div className="card h-full flex flex-col gap-3 group-hover:shadow-lg transition-shadow border-t-4 border-t-azure">
-        {event.status === "completed" && (
-          <span className="inline-flex items-center self-start text-xs font-heading font-semibold bg-gray-100 text-gray-500 px-3 py-1 rounded-md uppercase tracking-wide">
-            Completed
-          </span>
-        )}
-
+      <div className="card relative h-full flex flex-col gap-3 group-hover:shadow-lg transition-shadow border-t-4 border-t-azure pb-14">
         <h3 className="font-heading font-bold text-xl text-azure group-hover:text-sienna transition-colors leading-tight">
           {event.name}
         </h3>
@@ -66,35 +60,33 @@ export default function EventCard({
           <span>{event.venue}</span>
         </div>
 
-        <div className="flex items-end">
-          <div className="flex flex-col gap-0.5 text-sm font-body">
-            {nonprofit && (
-              <div className="text-gray-500">
-                <span className="font-semibold text-gray-700">Hosted by:</span>{" "}
-                {nonprofit.name}
-              </div>
-            )}
-            <div>
-              {musician ? (
-                <span className="text-gray-600">
-                  <span className="font-semibold text-gray-700">Performing:</span>{" "}
-                  {musician.name}
-                </span>
-              ) : (
-                <span className="text-gray-400 italic">Musician TBD</span>
-              )}
+        <div className="flex flex-col gap-0.5 text-sm font-body">
+          {nonprofit && (
+            <div className="text-gray-500">
+              <span className="font-semibold text-gray-700">Hosted by:</span>{" "}
+              {nonprofit.name}
             </div>
+          )}
+          <div>
+            {musician ? (
+              <span className="text-gray-600">
+                <span className="font-semibold text-gray-700">Performing:</span>{" "}
+                {musician.name}
+              </span>
+            ) : (
+              <span className="text-gray-400 italic">Musician TBD</span>
+            )}
           </div>
-          <div className="flex-1" />
-          <img 
-            src={getIconForEvent(event.id)} 
-            alt="" 
-            className="w-10 h-10 object-contain shrink-0" 
-            aria-hidden="true"
-          />
         </div>
 
         <div className="flex-1" />
+
+        <img
+          src={getIconForEvent(event.id)}
+          alt=""
+          className="absolute bottom-16 right-4 w-10 h-10 object-contain"
+          aria-hidden="true"
+        />
 
         <div className="flex justify-between items-center pt-2 pb-1 border-t border-sand-dark">
           <span className="text-sm font-heading font-semibold text-azure uppercase tracking-wide">

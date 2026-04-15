@@ -116,6 +116,7 @@ export default async function EventDetailPage({
               <RsvpButton
                 eventId={event.id}
                 initialRsvped={!!userRsvp}
+                initialRsvpCount={event.rsvp_count}
                 isLoggedIn={true}
               />
             ) : (

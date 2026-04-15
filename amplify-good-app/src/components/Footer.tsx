@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Footer({ isLoggedIn }: { isLoggedIn?: boolean } = {}) {
   return (
     <footer className="bg-azure text-white mt-auto">
-      <div className="max-w-7xl mx-auto px-4 pt-8 pb-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 pt-5 pb-3 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
@@ -24,9 +24,10 @@ export default function Footer({ isLoggedIn }: { isLoggedIn?: boolean } = {}) {
 
           {/* Links */}
           <div>
-            <h4 className="font-heading font-bold uppercase text-sm mb-3 tracking-wide">
+            <h4 className="font-heading font-bold uppercase text-sm mb-2 tracking-wide">
               Explore
             </h4>
+            <div className="w-16 h-0.5 bg-gold mb-3" />
             <ul className="space-y-1 text-sm text-blue-200">
               <li>
                 <Link href="/musicians" className="hover:text-orange transition-colors">
@@ -54,9 +55,10 @@ export default function Footer({ isLoggedIn }: { isLoggedIn?: boolean } = {}) {
 
           {/* Impact */}
           <div>
-            <h4 className="font-heading font-bold uppercase text-sm mb-3 tracking-wide">
+            <h4 className="font-heading font-bold uppercase text-sm mb-2 tracking-wide">
               Impact
             </h4>
+            <div className="w-16 h-0.5 bg-gold mb-3" />
             <p className="text-sm text-blue-200">
               Every booking funds live music at non-profit events across Austin.
               Your money goes further here.
@@ -65,7 +67,7 @@ export default function Footer({ isLoggedIn }: { isLoggedIn?: boolean } = {}) {
         </div>
 
         {/* Copyright */}
-        <div className="mt-6 pt-4 border-t border-blue-400/30 text-center">
+        <div className="mt-4 pt-3 border-t-2 border-gold text-center">
           <p className="text-xs text-blue-200">
             &copy; 2026 Amplify Good &middot; Austin, TX &middot; ACL Festival
             Meets Local Community

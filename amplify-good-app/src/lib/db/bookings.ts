@@ -51,6 +51,17 @@ export async function createBooking(data: CreateBookingData): Promise<DbBooking>
   return created
 }
 
+export async function completeExpiredBookings(): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('bookings')
+    .update({ status: 'completed' as DbBookingStatus, updated_at: new Date().toISOString() })
+    .eq('status', 'confirmed')
+    .lt('event_date', new Date().toISOString())
+
+  if (error) console.error('Failed to auto-complete bookings:', error.message)
+}
+
 export async function updateBookingStatus(
   id: string,
   status: DbBookingStatus

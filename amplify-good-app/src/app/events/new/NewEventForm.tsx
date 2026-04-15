@@ -99,12 +99,14 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
     genre: '',
     description: '',
     cause: '',
+    shortDescription: '',
   })
   const [submitted, setSubmitted] = useState(false)
   const [createdEventId, setCreatedEventId] = useState<string | null>(null)
   const [suggestedMusicians, setSuggestedMusicians] = useState<DbMusician[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [customCause, setCustomCause] = useState(false)
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -125,6 +127,7 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
       expectedAttendance: form.attendance ? Number(form.attendance) : undefined,
       genrePref: form.genre || undefined,
       description: form.description || undefined,
+      shortDescription: form.shortDescription || undefined,
       cause: form.cause || undefined,
     })
 
@@ -213,6 +216,7 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
                 setSubmitted(false)
                 setSuggestedMusicians([])
                 setCreatedEventId(null)
+                setCustomCause(false)
                 setForm({
                   eventName: '',
                   dateTime: '',
@@ -222,6 +226,7 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
                   genre: '',
                   description: '',
                   cause: '',
+                  shortDescription: '',
                 })
               }}
               className="btn-secondary inline-block text-center"
@@ -292,12 +297,12 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
             {/* Vibe / Theme */}
             <div>
               <label className="block font-heading font-semibold text-sm text-gray-700 mb-1">
-                Vibe / Theme <span className="text-sienna">*</span>
+                Vibe / Theme{' '}
+                <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 name="vibe"
-                required
                 value={form.vibe}
                 onChange={handleChange}
                 placeholder="e.g., casual outdoor BBQ, formal gala"
@@ -354,10 +359,16 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
                 Cause / Category <span className="text-sienna">*</span>
               </label>
               <select
-                name="cause"
-                required
-                value={form.cause}
-                onChange={handleChange}
+                value={customCause ? '__custom__' : form.cause}
+                onChange={(e) => {
+                  if (e.target.value === '__custom__') {
+                    setCustomCause(true)
+                    setForm((prev) => ({ ...prev, cause: '' }))
+                  } else {
+                    setCustomCause(false)
+                    setForm((prev) => ({ ...prev, cause: e.target.value }))
+                  }
+                }}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 font-body text-sm focus:outline-none focus:ring-2 focus:ring-azure bg-white"
               >
                 <option value="" disabled>
@@ -368,7 +379,40 @@ export default function NewEventForm({ musicians }: { musicians: DbMusician[] })
                     {c}
                   </option>
                 ))}
+                <option value="__custom__">Other (type your own)</option>
               </select>
+              {customCause && (
+                <input
+                  type="text"
+                  name="cause"
+                  required
+                  value={form.cause}
+                  onChange={handleChange}
+                  placeholder="e.g., Housing, Education, Mental Health"
+                  autoFocus
+                  className="w-full border border-gray-300 rounded-xl px-4 py-3 font-body text-sm focus:outline-none focus:ring-2 focus:ring-azure mt-2"
+                />
+              )}
+            </div>
+
+            {/* Short Description / Card Summary */}
+            <div>
+              <label className="block font-heading font-semibold text-sm text-gray-700 mb-1">
+                Card Summary{' '}
+                <span className="text-gray-400 font-normal">(optional, max 150 chars)</span>
+              </label>
+              <input
+                type="text"
+                name="shortDescription"
+                value={form.shortDescription}
+                onChange={handleChange}
+                maxLength={150}
+                placeholder="e.g., Supporting Austin Food Bank's fight against hunger."
+                className="w-full border border-gray-300 rounded-xl px-4 py-3 font-body text-sm focus:outline-none focus:ring-2 focus:ring-azure"
+              />
+              <p className="text-xs text-gray-400 font-body mt-1">
+                Shown on the event card below the title.
+              </p>
             </div>
 
             {/* Description */}

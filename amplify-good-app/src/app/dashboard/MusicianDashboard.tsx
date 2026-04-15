@@ -42,12 +42,15 @@ export function MusicianDashboard({
   const [editing, setEditing] = useState(false)
   const router = useRouter()
 
+  const now = new Date()
+  const isPast = (dateStr: string) => new Date(dateStr) < now
+
   const pendingBookings = bookings.filter((b) => b.status === 'pending')
-  const confirmedPrivate = bookings.filter((b) => b.status === 'confirmed')
-  const upcomingImpactEvents = assignedEvents.filter((e) => e.status === 'upcoming')
-  const completedPrivate = bookings.filter((b) => b.status === 'completed')
-  const completedEvents = assignedEvents.filter((e) => e.status === 'completed')
-  const totalEarnings = completedPrivate.reduce((sum, b) => sum + b.musician_rate, 0)
+  const upcomingPrivate = bookings.filter((b) => b.status === 'confirmed' && !isPast(b.event_date))
+  const upcomingImpactEvents = assignedEvents.filter((e) => !isPast(e.date_time) && e.status !== 'draft')
+  const pastPrivate = bookings.filter((b) => (b.status === 'completed') || (b.status === 'confirmed' && isPast(b.event_date)))
+  const pastImpactEvents = assignedEvents.filter((e) => isPast(e.date_time) && e.status !== 'draft')
+  const totalEarnings = pastPrivate.reduce((sum, b) => sum + b.musician_rate, 0)
 
   type GigDisplay = {
     id: string
@@ -67,7 +70,7 @@ export function MusicianDashboard({
   }
 
   const upcomingGigs = sortGigs([
-    ...confirmedPrivate.map((b) => ({
+    ...upcomingPrivate.map((b) => ({
       id: b.id,
       name: b.event_name,
       date: b.event_date,
@@ -86,7 +89,7 @@ export function MusicianDashboard({
   ])
 
   const pastGigs = sortGigs([
-    ...completedPrivate.map((b) => ({
+    ...pastPrivate.map((b) => ({
       id: b.id,
       name: b.event_name,
       date: b.event_date,
@@ -94,7 +97,7 @@ export function MusicianDashboard({
       type: 'private' as const,
       payout: b.musician_rate,
     })),
-    ...completedEvents.map((e) => ({
+    ...pastImpactEvents.map((e) => ({
       id: e.id,
       name: e.name,
       date: e.date_time,
@@ -108,19 +111,30 @@ export function MusicianDashboard({
     <div className="max-w-5xl mx-auto px-4 py-10 space-y-10">
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="font-display text-4xl uppercase tracking-wide text-azure">
-            Welcome back,
-          </h1>
-          <h2 className="font-heading text-3xl font-bold text-sienna">
-            {musician.name}
-          </h2>
-          <button
-            onClick={() => setEditing(true)}
-            className="mt-2 text-sm font-heading font-semibold text-azure hover:text-sienna transition-colors underline underline-offset-2"
-          >
-            Edit Profile
-          </button>
+        <div className="flex items-start gap-5">
+          <div className={`w-24 h-24 shrink-0 border-2 border-gold shadow-md overflow-hidden rounded-xl ${
+            musician.photo_url ? '' : 'bg-parchment'
+          }`}>
+            <img
+              src={musician.photo_url ?? '/images/icons/guitar_icon.png'}
+              alt={musician.name}
+              className={musician.photo_url ? 'w-full h-full object-cover' : 'w-full h-full object-contain p-2'}
+            />
+          </div>
+          <div>
+            <h1 className="font-display text-4xl uppercase tracking-wide text-azure">
+              Welcome back
+            </h1>
+            <h2 className="font-heading text-3xl font-bold text-sienna">
+              {musician.name}
+            </h2>
+            <button
+              onClick={() => setEditing(true)}
+              className="mt-0.5 text-sm font-heading font-semibold text-azure hover:text-sienna transition-colors underline underline-offset-2"
+            >
+              Edit Profile
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="font-body text-gray-600">Booking Requests</span>
@@ -307,13 +321,13 @@ export function MusicianDashboard({
             <p className="text-sm font-heading font-semibold uppercase text-gray-500 mb-1">
               Impact Gigs
             </p>
-            <p className="impact-number text-turquoise">{completedEvents.length}</p>
+            <p className="impact-number text-turquoise">{pastImpactEvents.length}</p>
           </div>
           <div className="card text-center">
             <p className="text-sm font-heading font-semibold uppercase text-gray-500 mb-1">
               Private Gigs
             </p>
-            <p className="impact-number text-azure">{completedPrivate.length}</p>
+            <p className="impact-number text-azure">{pastPrivate.length}</p>
           </div>
         </div>
       </section>

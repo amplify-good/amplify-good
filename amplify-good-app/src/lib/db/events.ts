@@ -62,6 +62,17 @@ export async function getEventsByNonprofitId(nonprofitId: string): Promise<DbEve
   return data ?? []
 }
 
+export async function completeExpiredEvents(): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('events')
+    .update({ status: 'completed', updated_at: new Date().toISOString() })
+    .eq('status', 'upcoming')
+    .lt('date_time', new Date().toISOString())
+
+  if (error) console.error('Failed to auto-complete events:', error.message)
+}
+
 export async function createEvent(data: CreateEventData): Promise<DbEvent> {
   const supabase = await createClient()
   const { data: created, error } = await supabase

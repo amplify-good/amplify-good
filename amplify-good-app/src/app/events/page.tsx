@@ -1,13 +1,16 @@
-import { getEvents } from "@/lib/db/events";
+import { getEvents, completeExpiredEvents } from "@/lib/db/events";
 import { getMusicians } from "@/lib/db/musicians";
 import { getNonprofits } from "@/lib/db/nonprofits";
 import { getUserRsvpEventIds } from "@/lib/db/rsvps";
+import { completeExpiredBookings } from "@/lib/db/bookings";
 import EventsClient from "./EventsClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getServerSession } from "@/lib/supabase/server";
 
 export default async function EventsPage() {
+  await Promise.all([completeExpiredEvents(), completeExpiredBookings()]);
+
   const [session, events, musicians, nonprofits] = await Promise.all([
     getServerSession(),
     getEvents(),

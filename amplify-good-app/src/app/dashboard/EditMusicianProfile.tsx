@@ -4,6 +4,7 @@ import { useState, useTransition, useRef } from 'react'
 import { updateMusicianProfileAction } from '@/app/actions/profiles'
 import { createClient } from '@/lib/supabase/client'
 import { uploadAvatar } from '@/lib/supabase/storage'
+import { ImageCropper } from '@/components/ImageCropper'
 import type { DbMusician } from '@/lib/db/types'
 
 const GENRES = [
@@ -30,6 +31,7 @@ export function EditMusicianProfile({
   const [available, setAvailable] = useState(musician.available)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(musician.photo_url)
+  const [rawImageSrc, setRawImageSrc] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -45,8 +47,19 @@ export function EditMusicianProfile({
       setError('Image must be under 5 MB.')
       return
     }
-    setPhotoFile(file)
-    setPhotoPreview(URL.createObjectURL(file))
+    setRawImageSrc(URL.createObjectURL(file))
+  }
+
+  const handleCropDone = (croppedFile: File, previewUrl: string) => {
+    setPhotoFile(croppedFile)
+    setPhotoPreview(previewUrl)
+    setRawImageSrc(null)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const handleCropCancel = () => {
+    setRawImageSrc(null)
+    if (fileRef.current) fileRef.current.value = ''
   }
 
   const handleRemovePhoto = () => {
@@ -124,11 +137,13 @@ export function EditMusicianProfile({
           <div>
             <span className={labelClass}>Profile Photo</span>
             <div className="flex items-center gap-4 mt-1">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-gold bg-white shrink-0">
+              <div className={`w-20 h-20 overflow-hidden border-2 border-gold shrink-0 rounded-xl ${
+                photoPreview ? '' : 'bg-parchment'
+              }`}>
                 <img
-                  src={photoPreview ?? '/images/icons/musician_profile_window_icon.png'}
+                  src={photoPreview ?? '/images/icons/guitar_icon.png'}
                   alt="Profile preview"
-                  className="w-full h-full object-cover"
+                  className={photoPreview ? 'w-full h-full object-cover' : 'w-full h-full object-contain p-2'}
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -274,6 +289,15 @@ export function EditMusicianProfile({
           </div>
         </div>
       </div>
+
+      {rawImageSrc && (
+        <ImageCropper
+          imageSrc={rawImageSrc}
+          cropShape="rect"
+          onCropDone={handleCropDone}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   )
 }

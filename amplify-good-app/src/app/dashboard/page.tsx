@@ -11,6 +11,8 @@ import {
   getBookingsByCommunityMemberId,
   getEventsByNonprofitId,
   getEventsByMusicianId,
+  completeExpiredBookings,
+  completeExpiredEvents,
 } from '@/lib/db'
 import type { DbBookingWithMusician } from '@/lib/db/types'
 import { formatDate, formatMoney } from '@/lib/format'
@@ -141,6 +143,8 @@ function CommunityDashboard({
 export default async function DashboardPage() {
   const session = await getServerSession()
   if (!session) redirect('/login')
+
+  await Promise.all([completeExpiredBookings(), completeExpiredEvents()])
 
   if (session.role === 'musician') {
     const musician = await getMusicianByUserId(session.userId)

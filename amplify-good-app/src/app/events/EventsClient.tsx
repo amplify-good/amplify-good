@@ -29,8 +29,10 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
   const [upcomingOpen, setUpcomingOpen] = useState(true);
   const [pastOpen, setPastOpen] = useState(true);
 
+  const isPast = (dateStr: string) => new Date(dateStr) < new Date();
+
   const myEvents = useMemo(
-    () => events.filter((e) => rsvpedSet.has(e.id) && e.status !== "completed"),
+    () => events.filter((e) => rsvpedSet.has(e.id) && !isPast(e.date_time)),
     [events, rsvpedSet]
   );
 
@@ -49,8 +51,8 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
     });
 
     return {
-      upcoming: filtered.filter((e) => e.status !== "completed" && !rsvpedSet.has(e.id)),
-      past: filtered.filter((e) => e.status === "completed"),
+      upcoming: filtered.filter((e) => !isPast(e.date_time) && !rsvpedSet.has(e.id)),
+      past: filtered.filter((e) => isPast(e.date_time)),
     };
   }, [events, genreFilter, causeFilter, keyword, rsvpedSet]);
 
@@ -149,7 +151,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
               <span className="font-body text-sm text-gray-400">
                 ({myEvents.length})
               </span>
-              <div className="h-px flex-1 bg-sand-dark" />
+              <div className="h-px flex-1 bg-sienna/40" />
               <svg
                 className={`w-5 h-5 text-sienna transition-transform ${myEventsOpen ? "rotate-180" : ""}`}
                 fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
@@ -200,10 +202,10 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
                   <h2 className="font-display text-2xl uppercase text-azure">
                     Upcoming Events
                   </h2>
-                  <span className="font-body text-sm text-gray-400">
+                  <span className="font-body text-sm font-semibold text-sienna">
                     ({upcoming.length})
                   </span>
-                  <div className="h-px flex-1 bg-sand-dark" />
+                  <div className="h-px flex-1 bg-sienna/40" />
                   <svg
                     className={`w-5 h-5 text-azure transition-transform ${upcomingOpen ? "rotate-180" : ""}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
@@ -239,7 +241,7 @@ export default function EventsClient({ events, musicians, nonprofits, rsvpedEven
                   <span className="font-body text-sm text-gray-400">
                     ({past.length})
                   </span>
-                  <div className="h-px flex-1 bg-sand-dark" />
+                  <div className="h-px flex-1 bg-sienna/40" />
                   <svg
                     className={`w-5 h-5 text-azure transition-transform ${pastOpen ? "rotate-180" : ""}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"

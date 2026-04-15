@@ -16,11 +16,13 @@ export async function toggleRsvpAction(
     if (existing) {
       await deleteRsvp(eventId, session.userId)
       revalidatePath(`/events/${eventId}`)
+      revalidatePath('/events')
       revalidatePath('/home')
       return { success: true, rsvped: false }
     } else {
       await createRsvp(eventId, session.userId)
       revalidatePath(`/events/${eventId}`)
+      revalidatePath('/events')
       revalidatePath('/home')
       return { success: true, rsvped: true }
     }

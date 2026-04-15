@@ -6,6 +6,7 @@ import Link from "next/link";
 import { signupAndLogin, type Role } from "@/lib/auth";
 import { uploadAvatar } from "@/lib/supabase/storage";
 import { updateMusicianProfileAction } from "@/app/actions/profiles";
+import { ImageCropper } from "@/components/ImageCropper";
 
 const GENRES = [
   "Rock",
@@ -238,11 +239,13 @@ function MusicianForm({
       <div>
         <label className={labelClass}>Profile Photo</label>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300 bg-white shrink-0">
+          <div className={`w-16 h-16 overflow-hidden border-2 border-gray-300 shrink-0 rounded-xl ${
+            photoPreview ? '' : 'bg-parchment'
+          }`}>
             <img
-              src={photoPreview ?? "/images/icons/musician_profile_window_icon.png"}
+              src={photoPreview ?? "/images/icons/guitar_icon.png"}
               alt="Preview"
-              className="w-full h-full object-cover"
+              className={photoPreview ? 'w-full h-full object-cover' : 'w-full h-full object-contain p-1.5'}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -493,6 +496,7 @@ export default function SignUpForm() {
   const [musicianRateType, setMusicianRateType] = useState<"hourly" | "per_event">("hourly");
   const [musicianPhoto, setMusicianPhoto] = useState<File | null>(null);
   const [musicianPhotoPreview, setMusicianPhotoPreview] = useState<string | null>(null);
+  const [musicianRawImageSrc, setMusicianRawImageSrc] = useState<string | null>(null);
   const musicianPhotoRef = useRef<HTMLInputElement>(null);
   const [nonprofitBio, setNonprofitBio] = useState("");
   const [nonprofitWebsite, setNonprofitWebsite] = useState("");
@@ -647,8 +651,7 @@ export default function SignUpForm() {
                 const file = e.target.files?.[0];
                 if (!file) return;
                 if (file.size > 5 * 1024 * 1024) { setError("Image must be under 5 MB."); return; }
-                setMusicianPhoto(file);
-                setMusicianPhotoPreview(URL.createObjectURL(file));
+                setMusicianRawImageSrc(URL.createObjectURL(file));
               }}
               onPhotoRemove={() => { setMusicianPhoto(null); setMusicianPhotoPreview(null); if (musicianPhotoRef.current) musicianPhotoRef.current.value = ""; }}
               error={error}
@@ -713,6 +716,23 @@ export default function SignUpForm() {
           </Link>
         </p>
       </div>
+
+      {musicianRawImageSrc && (
+        <ImageCropper
+          imageSrc={musicianRawImageSrc}
+          cropShape="rect"
+          onCropDone={(croppedFile, previewUrl) => {
+            setMusicianPhoto(croppedFile);
+            setMusicianPhotoPreview(previewUrl);
+            setMusicianRawImageSrc(null);
+            if (musicianPhotoRef.current) musicianPhotoRef.current.value = "";
+          }}
+          onCancel={() => {
+            setMusicianRawImageSrc(null);
+            if (musicianPhotoRef.current) musicianPhotoRef.current.value = "";
+          }}
+        />
+      )}
     </div>
   );
 }

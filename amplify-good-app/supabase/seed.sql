@@ -103,7 +103,7 @@ begin
     (eid2, nid3, mid3, 'Paws & Play Block Party',       '2026-06-21T12:00:00Z', 'Republic Square Park, 422 Guadalupe St',             'Casual outdoor block party with adoptable animals',                  500, 'Folk',       'A family-friendly afternoon of live music, food trucks, and adorable adoptable pets. Come for the music, leave with a new best friend. All proceeds support Austin Pets Alive!''s rescue operations.',                                       'Supporting Austin Pets Alive!''s animal rescue and adoption programs.',              'Animal Rescue',  'upcoming',   324),
     (eid3, nid4, mid4, 'Youth Showcase: Next Gen ATX',  '2026-07-04T16:00:00Z', 'Mohawk Austin, 912 Red River St',                    'High-energy youth talent showcase with headliner',                   300, 'Hip-Hop',    'Young musicians from Youth Arts Coalition take the stage alongside a headlining act. This is their moment — come witness the next generation of Austin''s music scene and support the programs that made it possible.',                        'Supporting Youth Arts Coalition''s music programs for the next generation.',         'Youth',          'upcoming',   156),
     (eid4, nid5, null, 'Sunset on the Springs',         '2026-07-18T17:00:00Z', 'Zilker Botanical Garden, 2220 Barton Springs Rd',    'Relaxed sunset concert in the garden',                               200, 'Folk',       'An evening of acoustic music surrounded by nature at Zilker Botanical Garden. Enjoy local food vendors, craft beverages, and the sounds of Hill Country folk as the sun sets over Austin.',                                               'Supporting environmental conservation and green spaces across Austin.',               'Environment',    'upcoming',   89),
-    (eid5, nid2, mid5, 'HAAM Benefit: Notes for Health', '2026-05-10T19:00:00Z', 'ACL Live at The Moody Theater, 310 W Willie Nelson Blvd', 'Concert-style benefit with multiple acts',                      400, 'Blues',      'An electrifying night of blues and rock at the Moody Theater, raising funds to keep Austin''s musicians healthy. Featuring Marcus & the Burning Oaks headlining with special guests.',                                                   'Supporting HAAM''s healthcare access for Austin''s working musicians.',               'Arts & Culture', 'completed',  378),
+    (eid5, nid2, mid5, 'HAAM Benefit: Notes for Health', '2026-05-10T19:00:00Z', 'ACL Live at The Moody Theater, 310 W Willie Nelson Blvd', 'Concert-style benefit with multiple acts',                      400, 'Blues',      'An electrifying night of blues and rock at the Moody Theater, raising funds to keep Austin''s musicians healthy. Featuring Marcus & the Burning Oaks headlining with special guests.',                                                   'Supporting HAAM''s healthcare access for Austin''s working musicians.',               'Arts & Culture', 'upcoming',   378),
     (eid6, nid1, mid1, 'Summer Meals Kickoff Cookout',   '2026-08-02T11:00:00Z', 'Givens District Park, 3811 E 12th St',               'Family-friendly outdoor cookout with live Latin music',               350, 'Latin',      'Austin Food Bank''s summer meals program launch. Free food distribution, live music, kids'' activities, and community resources. Come eat, dance, and help us fight hunger all summer long.',                                          'Supporting Austin Food Bank''s summer meals program for kids in need.',              'Healthcare',     'upcoming',   142),
     (eid7, nid4, null, 'Back to School Benefit Concert', '2026-08-22T18:00:00Z', 'The Parish, 214 E 6th St',                           'High-energy all-ages concert with electronic and hip-hop',            250, 'Electronic', 'Raising funds for Youth Arts Coalition''s back-to-school music equipment drive. DJ sets, student showcases, and a headlining performance. All ages welcome.',                                                                           'Supporting Youth Arts Coalition''s back-to-school music equipment drive.',           'Youth',          'draft',      0)
   on conflict (id) do nothing;
@@ -112,15 +112,53 @@ begin
   insert into public.bookings (id, musician_id, community_member_id, event_name, event_date, location, duration, musician_rate, commission_amount, total_charged, status, message)
   values
     (bid1, mid1, uid_community1, 'Torres Family Reunion BBQ',      '2026-06-28T14:00:00Z', 'Mueller Lake Park Pavilion',               '3 hours', 500, 75,   575,   'confirmed',  'We''d love a mix of cumbia and classic rock for a multigenerational crowd. About 80 people, outdoor setting with a covered pavilion.'),
-    (bid2, mid2, uid_community2, 'Chen-Williams Wedding Reception', '2026-05-03T17:00:00Z', 'Hotel Saint Cecilia, 112 Academy Dr',      '4 hours', 350, 52.5, 402.5, 'completed',  'Looking for elegant jazz and neo-soul for our wedding reception. Cocktail hour into dinner — about 120 guests, intimate garden setting.'),
+    (bid2, mid2, uid_community2, 'Chen-Williams Wedding Reception', '2026-05-03T17:00:00Z', 'Hotel Saint Cecilia, 112 Academy Dr',      '4 hours', 350, 52.5, 402.5, 'confirmed',  'Looking for elegant jazz and neo-soul for our wedding reception. Cocktail hour into dinner — about 120 guests, intimate garden setting.'),
     (bid3, mid5, 'a0000007-0000-0000-0000-000000000007', 'Launch Party: TechRise Demo Day',  '2026-07-12T19:00:00Z', 'Brazos Hall, 204 E 4th St',               '2 hours', 600, 90,   690,   'pending',    'High-energy blues-rock set for our startup demo day after-party. ~200 attendees, tech crowd that wants to let loose.'),
     (bid4, mid3, uid_community2, 'Hill Country Corporate Retreat',  '2026-06-07T15:00:00Z', 'Dripping Springs Ranch, Hwy 290',         '3 hours', 400, 60,   460,   'confirmed',  'Acoustic folk and country for an outdoor corporate retreat. Casual ranch setting, about 60 people, sunset session.'),
     (bid5, mid4, 'a0000007-0000-0000-0000-000000000007', 'SXSW Afterparty: Amplify After Dark', '2026-03-15T22:00:00Z', 'Kingdom, 5th & Red River',             '4 hours', 300, 45,   345,   'completed',  'High-energy DJ set for our SXSW afterparty. Full production setup, 300+ capacity, we want the place jumping.'),
-    (bid6, mid1, 'a0000005-0000-0000-0000-000000000005', 'Quinceañera de Sofia',              '2026-04-19T18:00:00Z', 'Fiesta Gardens, 2101 Jesse E Segovia St','4 hours', 500, 75,   575,   'completed',  'Traditional and modern Latin music for a quinceañera celebration. About 150 guests, outdoor pavilion by the lake.'),
+    (bid6, mid1, 'a0000005-0000-0000-0000-000000000005', 'Quinceañera de Sofia',              '2026-04-19T18:00:00Z', 'Fiesta Gardens, 2101 Jesse E Segovia St','4 hours', 500, 75,   575,   'confirmed',  'Traditional and modern Latin music for a quinceañera celebration. About 150 guests, outdoor pavilion by the lake.'),
     (bid7, mid1, 'a0000006-0000-0000-0000-000000000006', 'Brewery Grand Opening',             '2026-07-05T16:00:00Z', 'East Side Brewing, 1201 E 6th St',        '3 hours', 500, 75,   575,   'pending',    'Looking for high-energy Latin fusion to kick off our grand opening. Food trucks, 200+ expected, outdoor beer garden.'),
     (bid8, mid2, uid_community1, 'Jazz Night at Springdale Social',  '2026-08-15T20:00:00Z', 'Springdale General, 1023 Springdale Rd',  '2 hours', 350, 52.5, 402.5, 'confirmed',  'Intimate jazz night for a small crowd. 40-50 people, indoor venue, cocktails and candles.'),
     (bid9, mid5, uid_community2, '40th Birthday Blowout',            '2026-09-20T19:00:00Z', 'Stubb''s BBQ, 801 Red River St',           '3 hours', 600, 90,   690,   'pending',    'Blues and rock for a milestone birthday party. About 100 guests, Stubb''s indoor stage, full band setup.')
   on conflict (id) do nothing;
+
+  -- ── RSVPs ────────────────────────────────────────────────────────────────
+  -- Seed real RSVP rows for demo users so the trigger-maintained counts are accurate.
+  -- We insert rows, then reset rsvp_count to the actual row count per event.
+  insert into public.rsvps (event_id, user_id)
+  values
+    -- Feed the City Gala (eid1)
+    (eid1, uid_community1),
+    (eid1, uid_community2),
+    (eid1, 'a0000005-0000-0000-0000-000000000005'),
+    -- Paws & Play Block Party (eid2)
+    (eid2, uid_community1),
+    (eid2, uid_community2),
+    (eid2, 'a0000005-0000-0000-0000-000000000005'),
+    (eid2, 'a0000006-0000-0000-0000-000000000006'),
+    (eid2, 'a0000007-0000-0000-0000-000000000007'),
+    -- Youth Showcase (eid3)
+    (eid3, uid_community1),
+    (eid3, 'a0000007-0000-0000-0000-000000000007'),
+    -- Sunset on the Springs (eid4)
+    (eid4, uid_community2),
+    (eid4, 'a0000005-0000-0000-0000-000000000005'),
+    -- HAAM Benefit (eid5)
+    (eid5, uid_community1),
+    (eid5, uid_community2),
+    (eid5, 'a0000005-0000-0000-0000-000000000005'),
+    (eid5, 'a0000006-0000-0000-0000-000000000006'),
+    -- Summer Meals Kickoff (eid6)
+    (eid6, uid_community1),
+    (eid6, 'a0000006-0000-0000-0000-000000000006'),
+    (eid6, 'a0000007-0000-0000-0000-000000000007')
+  on conflict do nothing;
+
+  -- Reset rsvp_count to match actual RSVP rows (trigger already incremented
+  -- during the inserts above, but the events were seeded with hard-coded counts,
+  -- so we reconcile here).
+  update public.events e
+  set rsvp_count = (select count(*) from public.rsvps r where r.event_id = e.id);
 
   -- ── Impact Pool Transactions ───────────────────────────────────────────────
   -- Seed completed booking commissions as inflows
