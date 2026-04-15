@@ -55,15 +55,15 @@ export default function Navbar({ initialSession }: { initialSession?: AppSession
             <img
               src="/images/fist-logo.png"
               alt="Amplify Good"
-              className="h-10 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
-            <span className="font-display text-xl tracking-wide uppercase">
+            <span className="font-display text-2xl tracking-wide uppercase">
               Amplify Good
             </span>
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-6 font-heading font-semibold text-sm uppercase tracking-wide">
+          <div className="hidden md:flex items-center gap-4 font-heading font-semibold text-sm uppercase tracking-wide">
             <Link href="/events" className="hover:text-orange transition-colors">
               Events
             </Link>
@@ -76,8 +76,8 @@ export default function Navbar({ initialSession }: { initialSession?: AppSession
               </Link>
             )}
             {session ? (
-              <div className="flex items-center gap-3">
-                <span className="text-orange normal-case text-xs">
+              <div className="flex items-center gap-2 -ml-2">
+                <span className="border-l border-white/40 pl-2 text-orange">
                   {session.displayName}
                 </span>
                 <button
