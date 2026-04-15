@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function Footer() {
+export default function Footer({ isLoggedIn }: { isLoggedIn?: boolean } = {}) {
   return (
     <footer className="bg-azure text-white mt-auto">
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-4 sm:px-6 lg:px-8">
@@ -39,9 +39,15 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/signup" className="hover:text-orange transition-colors">
-                  Sign Up
-                </Link>
+                {isLoggedIn ? (
+                  <Link href="/dashboard" className="hover:text-orange transition-colors">
+                    My Dashboard
+                  </Link>
+                ) : (
+                  <Link href="/signup" className="hover:text-orange transition-colors">
+                    Sign Up
+                  </Link>
+                )}
               </li>
             </ul>
           </div>

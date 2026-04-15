@@ -3,8 +3,9 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SectionDivider from "@/components/SectionDivider";
-import { musicians } from "@/data/musicians";
-import { events } from "@/data/events";
+import { getMusicianById } from "@/lib/db/musicians";
+import { getEvents } from "@/lib/db/events";
+import { getServerSession } from "@/lib/supabase/server";
 
 // Social platform display config
 const socialIconMap: Record<string, { label: string; icon: string }> = {
@@ -23,38 +24,37 @@ const mediaTypeMap: Record<string, { label: string; prefix: string; color: strin
   soundcloud: { label: "Listen on SoundCloud", prefix: "☁",  color: "bg-orange-100 text-orange-800 hover:bg-orange-200" },
 };
 
-export async function generateStaticParams() {
-  return musicians.map((m) => ({ id: m.id }));
-}
-
 export default async function MusicianProfilePage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const musician = musicians.find((m) => m.id === id);
+  const [session, musician] = await Promise.all([
+    getServerSession(),
+    getMusicianById(id),
+  ]);
 
   if (!musician) {
     notFound();
   }
 
-  // Find an event where this musician is performing (for sponsor link)
+  const events = await getEvents({ status: "upcoming" });
   const sponsorableEvent = events.find(
-    (e) => e.musicianId === musician.id && e.status === "upcoming"
+    (e) => e.musician_id === musician.id
   );
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar initialSession={session} />
 
       {/* Hero Section */}
       <section className="bg-azure text-white py-16 px-4">
         <div className="max-w-4xl mx-auto flex flex-col items-center text-center gap-5">
           {/* Circular profile photo */}
-          <div className="w-48 h-48 flex-shrink-0">
+          <div className="w-48 h-48 shrink-0">
             <img
-              src={musician.photoUrl}
+              src={musician.photo_url ?? "/images/icons/musician_profile_window_icon.png"}
               alt={musician.name}
               className="w-full h-full object-contain drop-shadow-lg"
             />
@@ -98,7 +98,7 @@ export default async function MusicianProfilePage({
           <div className="flex items-baseline justify-center gap-2">
             <span className="impact-number text-5xl">${musician.rate}</span>
             <span className="font-body text-gray-500">
-              per {musician.rateType === "per_event" ? "event" : "hour"}
+              per {musician.rate_type === "per_event" ? "event" : "hour"}
             </span>
           </div>
         </section>
@@ -118,13 +118,13 @@ export default async function MusicianProfilePage({
         </section>
 
         {/* Media Gallery */}
-        {musician.mediaLinks.length > 0 && (
+        {musician.musician_media_links.length > 0 && (
           <section>
             <h2 className="font-heading text-2xl font-bold text-azure uppercase tracking-wide mb-4">
               Listen &amp; Watch
             </h2>
             <div className="flex flex-wrap gap-3">
-              {musician.mediaLinks.map((link, i) => {
+              {musician.musician_media_links.map((link, i) => {
                 const meta = mediaTypeMap[link.type] ?? {
                   label: `Listen: ${link.label}`,
                   prefix: "♪",
@@ -149,13 +149,13 @@ export default async function MusicianProfilePage({
         )}
 
         {/* Social Links */}
-        {musician.socialLinks.length > 0 && (
+        {musician.musician_social_links.length > 0 && (
           <section>
             <h2 className="font-heading text-2xl font-bold text-azure uppercase tracking-wide mb-4">
               Connect
             </h2>
             <div className="flex flex-wrap gap-3">
-              {musician.socialLinks.map((link, i) => {
+              {musician.musician_social_links.map((link, i) => {
                 const meta = socialIconMap[link.platform] ?? {
                   label: link.platform,
                   icon: "🔗",
@@ -181,27 +181,38 @@ export default async function MusicianProfilePage({
 
         {/* CTA Buttons */}
         <section className="flex flex-col sm:flex-row gap-4 pt-4">
-          <Link
-            href={`/book/${musician.id}`}
-            className="btn-primary inline-block text-center"
-          >
-            Request Booking
-          </Link>
-          {sponsorableEvent ? (
+          {session?.role === 'community' ? (
             <Link
-              href={`/sponsor/${sponsorableEvent.id}`}
-              className="btn-secondary inline-block text-center"
+              href={`/book/${musician.id}`}
+              className="btn-primary inline-block text-center"
             >
-              Sponsor This Set
+              Request Booking
             </Link>
-          ) : (
+          ) : !session ? (
             <Link
-              href="/events"
-              className="btn-secondary inline-block text-center"
+              href="/login"
+              className="btn-primary inline-block text-center"
             >
-              Find an Event to Sponsor
+              Log In to Book
             </Link>
-          )}
+          ) : null}
+          {session ? (
+            sponsorableEvent ? (
+              <Link
+                href={`/sponsor/${sponsorableEvent.id}`}
+                className="btn-secondary inline-block text-center"
+              >
+                Sponsor This Set
+              </Link>
+            ) : (
+              <Link
+                href="/events"
+                className="btn-secondary inline-block text-center"
+              >
+                Find an Event to Sponsor
+              </Link>
+            )
+          ) : null}
           <Link
             href="/musicians"
             className="font-heading font-semibold text-sm text-gray-500 hover:text-azure transition-colors self-center underline underline-offset-2"
@@ -212,7 +223,7 @@ export default async function MusicianProfilePage({
 
       </main>
 
-      <Footer />
+      <Footer isLoggedIn={!!session} />
     </div>
   );
 }

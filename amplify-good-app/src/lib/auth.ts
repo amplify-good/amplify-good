@@ -1,58 +1,151 @@
-import Cookies from "js-cookie";
+'use client'
 
-export type Role = "musician" | "nonprofit" | "community";
+import { createClient } from '@/lib/supabase/client'
 
-const COOKIE_KEY = "ampgood_role";
-const EMAIL_COOKIE = "ampgood_email";
+export type Role = 'musician' | 'nonprofit' | 'community'
 
-/** Map demo emails to roles */
-const EMAIL_ROLE_MAP: Record<string, Role> = {
-  "music@gmail.com": "musician",
-  "npo@gmail.com": "nonprofit",
-  "fan@gmail.com": "community",
-  "event@gmail.com": "community",
-};
-
-/** Log in — returns the role if email matches, null otherwise */
-export function login(email: string): Role | null {
-  const normalized = email.trim().toLowerCase();
-  const role = EMAIL_ROLE_MAP[normalized];
-  if (!role) return null;
-
-  Cookies.set(COOKIE_KEY, role, { expires: 7 });
-  Cookies.set(EMAIL_COOKIE, normalized, { expires: 7 });
-  return role;
+export interface AppSession {
+  userId: string
+  email: string
+  role: Role
+  displayName: string
 }
 
-/** Log in from signup — role is already known */
-export function signupLogin(role: Role, email: string) {
-  Cookies.set(COOKIE_KEY, role, { expires: 7 });
-  Cookies.set(EMAIL_COOKIE, email.trim().toLowerCase(), { expires: 7 });
+type SignUpPayload = {
+  email: string
+  password: string
+  role: Role
+  displayName: string
+  musician?: {
+    bio?: string
+    genres: string[]
+    rate?: number
+    rateType: 'per_event' | 'hourly'
+  }
+  nonprofit?: {
+    bio?: string
+    website?: string
+    cause?: string
+  }
 }
 
-const VALID_ROLES: Role[] = ["musician", "nonprofit", "community"];
+/**
+ * Sign in with email + password.
+ * Returns the user's role on success, or an error message on failure.
+ */
+export async function login(
+  email: string,
+  password: string
+): Promise<{ role: Role } | { error: string }> {
+  const supabase = createClient()
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  if (error || !data.user) {
+    return { error: error?.message ?? 'Login failed' }
+  }
 
-/** Get current session */
-export function getSession(): { role: Role; email: string } | null {
-  const rawRole = Cookies.get(COOKIE_KEY);
-  const email = Cookies.get(EMAIL_COOKIE);
-  if (!rawRole || !email || !VALID_ROLES.includes(rawRole as Role)) return null;
-  return { role: rawRole as Role, email };
+  const role = data.user.user_metadata?.role as Role | undefined
+  if (!role) return { error: 'Profile not found. Please contact support.' }
+
+  return { role }
 }
 
-/** Log out */
-export function logout() {
-  Cookies.remove(COOKIE_KEY);
-  Cookies.remove(EMAIL_COOKIE);
+/**
+ * Sign up a new user and immediately sign them in.
+ * The handle_new_user trigger auto-creates the profiles row.
+ */
+export async function signupAndLogin(
+  payload: SignUpPayload
+): Promise<{ role: Role } | { error: string }> {
+  const supabase = createClient()
+  const { data, error } = await supabase.auth.signUp({
+    email: payload.email,
+    password: payload.password,
+    options: {
+      data: { role: payload.role, display_name: payload.displayName },
+    },
+  })
+
+  if (error || !data.user) {
+    return { error: error?.message ?? 'Signup failed' }
+  }
+
+  if (!data.session) {
+    return {
+      error:
+        'Signup succeeded, but no active session was created. Disable email confirmation in Supabase or add a confirmation callback flow before allowing public signup.',
+    }
+  }
+
+  if (payload.role === 'musician') {
+    const musician = payload.musician
+    const { error: musicianError } = await supabase
+      .from('musicians')
+      .insert({
+        user_id: data.user.id,
+        name: payload.displayName,
+        bio: musician?.bio?.trim() || null,
+        genres: musician?.genres?.length ? musician.genres : [],
+        photo_url: null,
+        rate: musician?.rate ?? 0,
+        rate_type: musician?.rateType ?? 'hourly',
+        available: true,
+      })
+
+    if (musicianError) {
+      return { error: `Signup succeeded, but musician profile creation failed: ${musicianError.message}` }
+    }
+  }
+
+  if (payload.role === 'nonprofit') {
+    const nonprofit = payload.nonprofit
+    const { error: nonprofitError } = await supabase
+      .from('nonprofits')
+      .insert({
+        user_id: data.user.id,
+        name: payload.displayName,
+        bio: nonprofit?.bio?.trim() || null,
+        website: nonprofit?.website?.trim() || null,
+        logo_url: null,
+        contact_email: payload.email,
+        cause: nonprofit?.cause?.trim() || null,
+      })
+
+    if (nonprofitError) {
+      return { error: `Signup succeeded, but nonprofit profile creation failed: ${nonprofitError.message}` }
+    }
+  }
+
+  return { role: payload.role }
 }
 
-/** Display name for each demo account */
-export function getDisplayName(email: string): string {
-  const map: Record<string, string> = {
-    "music@gmail.com": "Los Topo Chicos",
-    "npo@gmail.com": "Austin Food Bank",
-    "fan@gmail.com": "Rachel Torres",
-    "event@gmail.com": "David Chen",
-  };
-  return map[email] || email;
+/**
+ * Get the current session from the browser Supabase client.
+ * Returns null if not logged in.
+ */
+export async function getSession(): Promise<AppSession | null> {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const role = user.user_metadata?.role as Role | undefined
+  const displayName = user.user_metadata?.display_name as string | undefined
+
+  if (!role) return null
+
+  return {
+    userId: user.id,
+    email: user.email!,
+    role,
+    displayName: displayName || user.email!,
+  }
+}
+
+/**
+ * Sign out the current user (local only — clears cookies without a network call).
+ */
+export async function logout(): Promise<void> {
+  const supabase = createClient()
+  await supabase.auth.signOut({ scope: 'local' })
 }

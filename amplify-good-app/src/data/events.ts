@@ -8,6 +8,7 @@ export interface Event {
   expectedAttendance: number;
   genrePref: string;
   description: string;
+  shortDescription: string;
   cause: string;
   status: "upcoming" | "completed" | "draft";
   musicianId: string | null;
@@ -25,6 +26,7 @@ export const events: Event[] = [
     expectedAttendance: 250,
     genrePref: "Jazz",
     description: "Austin Food Bank's annual fundraiser bringing together donors, volunteers, and community leaders for an evening of fine dining, live jazz, and impact stories. Every dollar raised goes directly to fighting hunger in Central Texas.",
+    shortDescription: "Supporting Austin Food Bank's fight against hunger in Central Texas.",
     cause: "Healthcare",
     status: "upcoming",
     musicianId: "m2",
@@ -40,6 +42,7 @@ export const events: Event[] = [
     expectedAttendance: 500,
     genrePref: "Folk",
     description: "A family-friendly afternoon of live music, food trucks, and adorable adoptable pets. Come for the music, leave with a new best friend. All proceeds support Austin Pets Alive!'s rescue operations.",
+    shortDescription: "Supporting Austin Pets Alive!'s animal rescue and adoption programs.",
     cause: "Animal Rescue",
     status: "upcoming",
     musicianId: "m3",
@@ -55,6 +58,7 @@ export const events: Event[] = [
     expectedAttendance: 300,
     genrePref: "Hip-Hop",
     description: "Young musicians from Youth Arts Coalition take the stage alongside a headlining act. This is their moment — come witness the next generation of Austin's music scene and support the programs that made it possible.",
+    shortDescription: "Supporting Youth Arts Coalition's music programs for the next generation.",
     cause: "Youth",
     status: "upcoming",
     musicianId: "m4",
@@ -70,6 +74,7 @@ export const events: Event[] = [
     expectedAttendance: 200,
     genrePref: "Folk",
     description: "An evening of acoustic music surrounded by nature at Zilker Botanical Garden. Enjoy local food vendors, craft beverages, and the sounds of Hill Country folk as the sun sets over Austin.",
+    shortDescription: "Supporting environmental conservation and green spaces across Austin.",
     cause: "Environment",
     status: "upcoming",
     musicianId: null,
@@ -85,6 +90,7 @@ export const events: Event[] = [
     expectedAttendance: 400,
     genrePref: "Blues",
     description: "An electrifying night of blues and rock at the Moody Theater, raising funds to keep Austin's musicians healthy. Featuring Marcus & the Burning Oaks headlining with special guests.",
+    shortDescription: "Supporting HAAM's healthcare access for Austin's working musicians.",
     cause: "Arts & Culture",
     status: "completed",
     musicianId: "m5",
@@ -100,6 +106,7 @@ export const events: Event[] = [
     expectedAttendance: 350,
     genrePref: "Latin",
     description: "Austin Food Bank's summer meals program launch. Free food distribution, live music, kids' activities, and community resources. Come eat, dance, and help us fight hunger all summer long.",
+    shortDescription: "Supporting Austin Food Bank's summer meals program for kids in need.",
     cause: "Healthcare",
     status: "upcoming",
     musicianId: "m1",
@@ -115,6 +122,7 @@ export const events: Event[] = [
     expectedAttendance: 250,
     genrePref: "Electronic",
     description: "Raising funds for Youth Arts Coalition's back-to-school music equipment drive. DJ sets, student showcases, and a headlining performance. All ages welcome.",
+    shortDescription: "Supporting Youth Arts Coalition's back-to-school music equipment drive.",
     cause: "Youth",
     status: "draft",
     musicianId: null,

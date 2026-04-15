@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { signupLogin } from "@/lib/auth";
-
-type Role = "musician" | "nonprofit" | "community";
+import { signupAndLogin, type Role } from "@/lib/auth";
+import { uploadAvatar } from "@/lib/supabase/storage";
+import { updateMusicianProfileAction } from "@/app/actions/profiles";
 
 const GENRES = [
   "Rock",
@@ -49,28 +49,80 @@ const labelClass = "block font-heading font-semibold text-sm text-gray-700 mb-1"
 
 // ─── Sub-components for each role form ──────────────────────────────────────
 
-function MusicianForm() {
-  const [genres, setGenres] = useState<string[]>([]);
-  const [bio, setBio] = useState("");
-  const [rateType, setRateType] = useState("hourly");
-
-  const toggleGenre = (g: string) =>
-    setGenres((prev) =>
-      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]
-    );
+function MusicianForm({
+  name,
+  onNameChange,
+  email,
+  onEmailChange,
+  password,
+  onPasswordChange,
+  bio,
+  onBioChange,
+  genres,
+  onGenresChange,
+  rate,
+  onRateChange,
+  rateType,
+  onRateTypeChange,
+  photoPreview,
+  photoRef,
+  onPhotoChange,
+  onPhotoRemove,
+  error,
+}: {
+  name: string;
+  onNameChange: (v: string) => void;
+  email: string;
+  onEmailChange: (v: string) => void;
+  password: string;
+  onPasswordChange: (v: string) => void;
+  bio: string;
+  onBioChange: (v: string) => void;
+  genres: string[];
+  onGenresChange: (v: string[]) => void;
+  rate: string;
+  onRateChange: (v: string) => void;
+  rateType: "hourly" | "per_event";
+  onRateTypeChange: (v: "hourly" | "per_event") => void;
+  photoPreview: string | null;
+  photoRef: React.RefObject<HTMLInputElement | null>;
+  onPhotoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onPhotoRemove: () => void;
+  error: string;
+}) {
+  const toggleGenre = (g: string) => {
+    const nextGenres = genres.includes(g)
+      ? genres.filter((genre) => genre !== g)
+      : [...genres, g];
+    onGenresChange(nextGenres);
+  };
 
   return (
     <div className="space-y-5">
       {/* Name */}
       <div>
         <label htmlFor="m-name" className={labelClass}>Name</label>
-        <input id="m-name" type="text" placeholder="Your full name" className={inputClass} />
+        <input
+          id="m-name"
+          type="text"
+          placeholder="Your full name"
+          className={inputClass}
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+        />
       </div>
 
       {/* Email */}
       <div>
         <label htmlFor="m-email" className={labelClass}>Email</label>
-        <input id="m-email" type="email" placeholder="you@example.com" className={inputClass} />
+        <input
+          id="m-email"
+          type="email"
+          placeholder="you@example.com"
+          className={inputClass}
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+        />
       </div>
 
       {/* Password */}
@@ -81,6 +133,8 @@ function MusicianForm() {
           type="password"
           placeholder="Create a password"
           className={inputClass}
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
         />
       </div>
 
@@ -99,7 +153,7 @@ function MusicianForm() {
           placeholder="Tell the Austin community about yourself…"
           className={inputClass + " resize-none"}
           value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          onChange={(e) => onBioChange(e.target.value)}
         />
       </div>
 
@@ -162,6 +216,8 @@ function MusicianForm() {
             placeholder="e.g. 150"
             min={0}
             className={inputClass}
+            value={rate}
+            onChange={(e) => onRateChange(e.target.value)}
           />
         </div>
         <div>
@@ -170,7 +226,7 @@ function MusicianForm() {
             id="m-ratetype"
             className={inputClass + " bg-white cursor-pointer"}
             value={rateType}
-            onChange={(e) => setRateType(e.target.value)}
+            onChange={(e) => onRateTypeChange(e.target.value as "hourly" | "per_event")}
           >
             <option value="hourly">Hourly</option>
             <option value="per_event">Per Event</option>
@@ -180,60 +236,133 @@ function MusicianForm() {
 
       {/* Profile Photo */}
       <div>
-        <label htmlFor="m-photo" className={labelClass}>Profile Photo</label>
-        <label htmlFor="m-photo" className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-azure transition cursor-pointer block" role="button" tabIndex={0}>
-          <svg
-            className="mx-auto h-10 w-10 text-gray-300 mb-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"
+        <label className={labelClass}>Profile Photo</label>
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300 bg-white shrink-0">
+            <img
+              src={photoPreview ?? "/images/icons/musician_profile_window_icon.png"}
+              alt="Preview"
+              className="w-full h-full object-cover"
             />
-          </svg>
-          <p className="text-sm text-gray-500 font-body">
-            Click to upload or drag &amp; drop
-          </p>
-          <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 5MB</p>
-          <input id="m-photo" type="file" accept="image/*" className="sr-only" aria-label="Upload profile photo" />
-        </label>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="btn-secondary text-xs text-center cursor-pointer py-1.5 px-4 inline-block">
+              Choose Photo
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={onPhotoChange}
+              />
+            </label>
+            {photoPreview && (
+              <button
+                type="button"
+                onClick={onPhotoRemove}
+                className="text-xs text-sienna hover:underline font-body text-left"
+              >
+                Remove
+              </button>
+            )}
+            <span className="text-xs text-gray-400 font-body">Optional. Max 5 MB.</span>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function NonProfitForm() {
-  const [bio, setBio] = useState("");
-
+function NonProfitForm({
+  name,
+  onNameChange,
+  email,
+  onEmailChange,
+  password,
+  onPasswordChange,
+  bio,
+  onBioChange,
+  website,
+  onWebsiteChange,
+  cause,
+  onCauseChange,
+}: {
+  name: string;
+  onNameChange: (v: string) => void;
+  email: string;
+  onEmailChange: (v: string) => void;
+  password: string;
+  onPasswordChange: (v: string) => void;
+  bio: string;
+  onBioChange: (v: string) => void;
+  website: string;
+  onWebsiteChange: (v: string) => void;
+  cause: string;
+  onCauseChange: (v: string) => void;
+}) {
   return (
     <div className="space-y-5">
       <div>
         <label htmlFor="np-name" className={labelClass}>Organization Name</label>
-        <input id="np-name" type="text" placeholder="Your organization's name" className={inputClass} />
+        <input
+          id="np-name"
+          type="text"
+          placeholder="Your organization's name"
+          className={inputClass}
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="np-bio" className={labelClass}>
           Bio / Mission Statement{" "}
           <span className="text-gray-400 font-normal">({bio.length}/1000)</span>
         </label>
-        <textarea id="np-bio" rows={5} maxLength={1000} placeholder="Describe your mission and how live music supports your cause…" className={inputClass + " resize-none"} value={bio} onChange={(e) => setBio(e.target.value)} />
+        <textarea id="np-bio" rows={5} maxLength={1000} placeholder="Describe your mission and how live music supports your cause…" className={inputClass + " resize-none"} value={bio} onChange={(e) => onBioChange(e.target.value)} />
+      </div>
+      <div>
+        <label htmlFor="np-cause" className={labelClass}>Primary Cause</label>
+        <input
+          id="np-cause"
+          type="text"
+          placeholder="Food security, youth arts, environmental stewardship..."
+          className={inputClass}
+          value={cause}
+          onChange={(e) => onCauseChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="np-website" className={labelClass}>Website</label>
-        <input id="np-website" type="url" placeholder="https://yourorg.org" className={inputClass} />
+        <input
+          id="np-website"
+          type="url"
+          placeholder="https://yourorg.org"
+          className={inputClass}
+          value={website}
+          onChange={(e) => onWebsiteChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="np-email" className={labelClass}>Contact Email</label>
-        <input id="np-email" type="email" placeholder="contact@yourorg.org" className={inputClass} />
+        <input
+          id="np-email"
+          type="email"
+          placeholder="contact@yourorg.org"
+          className={inputClass}
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="np-password" className={labelClass}>Password</label>
-        <input id="np-password" type="password" placeholder="Create a password" className={inputClass} />
+        <input
+          id="np-password"
+          type="password"
+          placeholder="Create a password"
+          className={inputClass}
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="np-logo" className={labelClass}>Organization Logo</label>
@@ -250,20 +379,55 @@ function NonProfitForm() {
   );
 }
 
-function CommunityForm() {
+function CommunityForm({
+  name,
+  onNameChange,
+  email,
+  onEmailChange,
+  password,
+  onPasswordChange,
+}: {
+  name: string;
+  onNameChange: (v: string) => void;
+  email: string;
+  onEmailChange: (v: string) => void;
+  password: string;
+  onPasswordChange: (v: string) => void;
+}) {
   return (
     <div className="space-y-5">
       <div>
         <label htmlFor="c-name" className={labelClass}>Name</label>
-        <input id="c-name" type="text" placeholder="Your full name" className={inputClass} />
+        <input
+          id="c-name"
+          type="text"
+          placeholder="Your full name"
+          className={inputClass}
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="c-email" className={labelClass}>Email</label>
-        <input id="c-email" type="email" placeholder="you@example.com" className={inputClass} />
+        <input
+          id="c-email"
+          type="email"
+          placeholder="you@example.com"
+          className={inputClass}
+          value={email}
+          onChange={(e) => onEmailChange(e.target.value)}
+        />
       </div>
       <div>
         <label htmlFor="c-password" className={labelClass}>Password</label>
-        <input id="c-password" type="password" placeholder="Create a password" className={inputClass} />
+        <input
+          id="c-password"
+          type="password"
+          placeholder="Create a password"
+          className={inputClass}
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
+        />
       </div>
     </div>
   );
@@ -315,28 +479,99 @@ export default function SignUpForm() {
   const searchParams = useSearchParams();
 
   const rawRole = searchParams.get("role") ?? "community";
-  const initialRole: Role = ["musician", "nonprofit", "community"].includes(
-    rawRole
-  )
+  const initialRole: Role = ["musician", "nonprofit", "community"].includes(rawRole)
     ? (rawRole as Role)
     : "community";
 
   const [role, setRole] = useState<Role>(initialRole);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [musicianBio, setMusicianBio] = useState("");
+  const [musicianGenres, setMusicianGenres] = useState<string[]>([]);
+  const [musicianRate, setMusicianRate] = useState("");
+  const [musicianRateType, setMusicianRateType] = useState<"hourly" | "per_event">("hourly");
+  const [musicianPhoto, setMusicianPhoto] = useState<File | null>(null);
+  const [musicianPhotoPreview, setMusicianPhotoPreview] = useState<string | null>(null);
+  const musicianPhotoRef = useRef<HTMLInputElement>(null);
+  const [nonprofitBio, setNonprofitBio] = useState("");
+  const [nonprofitWebsite, setNonprofitWebsite] = useState("");
+  const [nonprofitCause, setNonprofitCause] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setRole(initialRole);
+  }, [initialRole]);
 
   const handleRoleChange = (r: Role) => {
     setRole(r);
+    setError("");
     router.replace(`/signup?role=${r}`);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const demoEmails: Record<string, string> = {
-      musician: "music@gmail.com",
-      nonprofit: "npo@gmail.com",
-      community: "fan@gmail.com",
-    };
-    signupLogin(role, demoEmails[role]);
-    router.push(`/dashboard?role=${role}`);
+    setError("");
+    if (!email || !password || !displayName) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    if (role === "musician" && musicianGenres.length === 0) {
+      setError("Please select at least one genre.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await signupAndLogin({
+        email,
+        password,
+        role,
+        displayName,
+        musician:
+          role === "musician"
+            ? {
+                bio: musicianBio,
+                genres: musicianGenres,
+                rate: musicianRate ? Number(musicianRate) : undefined,
+                rateType: musicianRateType,
+              }
+            : undefined,
+        nonprofit:
+          role === "nonprofit"
+            ? {
+                bio: nonprofitBio,
+                website: nonprofitWebsite,
+                cause: nonprofitCause,
+              }
+            : undefined,
+      });
+      if ("error" in result) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      // Upload musician photo after signup if one was selected
+      if (role === "musician" && musicianPhoto) {
+        try {
+          const { createClient } = await import("@/lib/supabase/client");
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const photoUrl = await uploadAvatar(user.id, musicianPhoto);
+            await updateMusicianProfileAction({ photoUrl });
+          }
+        } catch {
+          // Photo upload failed but account was created — continue to dashboard
+        }
+      }
+
+      window.location.href = result.role === "community" ? "/home" : "/dashboard";
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
   };
 
   const meta = ROLE_META[role];
@@ -390,9 +625,61 @@ export default function SignUpForm() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {role === "musician" && <MusicianForm />}
-          {role === "nonprofit" && <NonProfitForm />}
-          {role === "community" && <CommunityForm />}
+          {role === "musician" && (
+            <MusicianForm
+              name={displayName}
+              onNameChange={setDisplayName}
+              email={email}
+              onEmailChange={setEmail}
+              password={password}
+              onPasswordChange={setPassword}
+              bio={musicianBio}
+              onBioChange={setMusicianBio}
+              genres={musicianGenres}
+              onGenresChange={setMusicianGenres}
+              rate={musicianRate}
+              onRateChange={setMusicianRate}
+              rateType={musicianRateType}
+              onRateTypeChange={setMusicianRateType}
+              photoPreview={musicianPhotoPreview}
+              photoRef={musicianPhotoRef}
+              onPhotoChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) { setError("Image must be under 5 MB."); return; }
+                setMusicianPhoto(file);
+                setMusicianPhotoPreview(URL.createObjectURL(file));
+              }}
+              onPhotoRemove={() => { setMusicianPhoto(null); setMusicianPhotoPreview(null); if (musicianPhotoRef.current) musicianPhotoRef.current.value = ""; }}
+              error={error}
+            />
+          )}
+          {role === "nonprofit" && (
+            <NonProfitForm
+              name={displayName}
+              onNameChange={setDisplayName}
+              email={email}
+              onEmailChange={setEmail}
+              password={password}
+              onPasswordChange={setPassword}
+              bio={nonprofitBio}
+              onBioChange={setNonprofitBio}
+              website={nonprofitWebsite}
+              onWebsiteChange={setNonprofitWebsite}
+              cause={nonprofitCause}
+              onCauseChange={setNonprofitCause}
+            />
+          )}
+          {role === "community" && (
+            <CommunityForm
+              name={displayName}
+              onNameChange={setDisplayName}
+              email={email}
+              onEmailChange={setEmail}
+              password={password}
+              onPasswordChange={setPassword}
+            />
+          )}
 
           {/* Terms */}
           <p className="text-xs text-gray-400 font-body text-center">
@@ -407,9 +694,14 @@ export default function SignUpForm() {
             .
           </p>
 
+          {/* Error */}
+          {error && (
+            <p className="text-sm text-sienna font-body text-center">{error}</p>
+          )}
+
           {/* Submit */}
-          <button type="submit" className="btn-primary w-full text-center">
-            Create Account
+          <button type="submit" disabled={loading} className="btn-primary w-full text-center">
+            {loading ? "Creating Account…" : "Create Account"}
           </button>
         </form>
 

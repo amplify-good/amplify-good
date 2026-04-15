@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getServerSession } from "@/lib/supabase/server";
 
 const roles = [
   {
@@ -28,7 +30,12 @@ const roles = [
   },
 ];
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await getServerSession();
+  if (session) {
+    redirect(session.role === "community" ? "/home" : "/dashboard");
+  }
+
   return (
     <main className="sm:h-screen flex flex-col min-h-screen relative">
       {/* Decorative corner accents — subtle, festival-poster style */}
@@ -59,6 +66,7 @@ export default function LandingPage() {
             alt=""
             width={40}
             height={40}
+            style={{ width: 'auto', height: 'auto' }}
             aria-hidden="true"
           />
           <div className="h-px w-24 sm:w-40 bg-sienna/40" />
@@ -87,7 +95,7 @@ export default function LandingPage() {
                 {role.description}
               </p>
 
-              <Link href={role.href} className={`${role.btnClass} inline-block mt-auto !py-2 !px-6 text-sm`}>
+              <Link href={role.href} className={`${role.btnClass} inline-block mt-auto py-2! px-6! text-sm`}>
                 Get Started
               </Link>
             </div>

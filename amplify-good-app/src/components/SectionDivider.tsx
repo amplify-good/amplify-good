@@ -14,7 +14,8 @@ export default function SectionDivider({
   icon?: string;
   className?: string;
 }) {
-  const src = icon || dividerIcons[Math.floor(Math.random() * dividerIcons.length)];
+  const fallbackIndex = className.length % dividerIcons.length;
+  const src = icon || dividerIcons[fallbackIndex];
 
   return (
     <div className={`flex items-center justify-center gap-4 my-6 ${className}`}>

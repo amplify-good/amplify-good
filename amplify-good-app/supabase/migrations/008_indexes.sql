@@ -1,0 +1,13 @@
+create index if not exists idx_musicians_user_id      on public.musicians(user_id);
+create index if not exists idx_musicians_available     on public.musicians(available);
+create index if not exists idx_events_nonprofit_id     on public.events(nonprofit_id);
+create index if not exists idx_events_musician_id      on public.events(musician_id);
+create index if not exists idx_events_status           on public.events(status);
+create index if not exists idx_events_date_time        on public.events(date_time);
+create index if not exists idx_bookings_musician_id    on public.bookings(musician_id);
+create index if not exists idx_bookings_community_id   on public.bookings(community_member_id);
+create index if not exists idx_bookings_status         on public.bookings(status);
+create index if not exists idx_rsvps_event_id          on public.rsvps(event_id);
+create index if not exists idx_rsvps_user_id           on public.rsvps(user_id);
+create index if not exists idx_nonprofits_user_id      on public.nonprofits(user_id);
+create index if not exists idx_impact_transactions_type on public.impact_pool_transactions(type);

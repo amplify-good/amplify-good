@@ -2,19 +2,47 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { getSession, logout, getDisplayName } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/client";
+import type { AppSession } from "@/lib/auth";
 
-export default function Navbar() {
+function sessionFromUser(user: { id: string; email?: string; user_metadata?: Record<string, unknown> }): AppSession | null {
+  const role = user.user_metadata?.role as AppSession["role"] | undefined;
+  const displayName = user.user_metadata?.display_name as string | undefined;
+  if (!role) return null;
+  return { userId: user.id, email: user.email!, role, displayName: displayName || user.email! };
+}
+
+export default function Navbar({ initialSession }: { initialSession?: AppSession | null }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [session, setSession] = useState<{ role: string; email: string } | null>(null);
+  const [session, setSession] = useState<AppSession | null>(initialSession ?? null);
 
   useEffect(() => {
-    setSession(getSession());
-  }, []);
+    const supabase = createClient();
 
-  const handleLogout = () => {
-    logout();
-    setSession(null);
+    if (!initialSession) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        setSession(user ? sessionFromUser(user) : null);
+      });
+    }
+
+    // Per Supabase docs: keep this callback synchronous and never await
+    // other Supabase methods inside it to avoid deadlocks.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, supabaseSession) => {
+        if (!supabaseSession?.user) {
+          setSession(null);
+          return;
+        }
+        setSession(sessionFromUser(supabaseSession.user));
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [initialSession]);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut({ scope: 'local' });
     window.location.href = "/";
   };
 
@@ -23,7 +51,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href={session ? "/home" : "/"} className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <img
               src="/images/fist-logo.png"
               alt="Amplify Good"
@@ -42,23 +70,25 @@ export default function Navbar() {
             <Link href="/musicians" className="hover:text-orange transition-colors">
               Musicians
             </Link>
-            <Link href="/dashboard" className="hover:text-orange transition-colors">
-              Dashboard
-            </Link>
+            {session && (
+              <Link href="/dashboard" className="hover:text-orange transition-colors">
+                Dashboard
+              </Link>
+            )}
             {session ? (
               <div className="flex items-center gap-3">
                 <span className="text-orange normal-case text-xs">
-                  {getDisplayName(session.email)}
+                  {session.displayName}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="btn-secondary !border-white !text-white hover:!bg-white hover:!text-azure !py-2 !px-4 text-sm rounded-full"
+                  className="btn-secondary border-white! text-white! hover:bg-white! hover:text-azure! py-2! px-4! text-sm rounded-full"
                 >
                   Log Out
                 </button>
               </div>
             ) : (
-              <Link href="/login" className="btn-secondary !border-white !text-white hover:!bg-white hover:!text-azure !py-2 !px-4 text-sm rounded-full">
+              <Link href="/login" className="btn-secondary border-white! text-white! hover:bg-white! hover:text-azure! py-2! px-4! text-sm rounded-full">
                 Log In
               </Link>
             )}
@@ -89,13 +119,15 @@ export default function Navbar() {
             <Link href="/musicians" className="block py-2 hover:text-orange" onClick={() => setMenuOpen(false)}>
               Musicians
             </Link>
-            <Link href="/dashboard" className="block py-2 hover:text-orange" onClick={() => setMenuOpen(false)}>
-              Dashboard
-            </Link>
+            {session && (
+              <Link href="/dashboard" className="block py-2 hover:text-orange" onClick={() => setMenuOpen(false)}>
+                Dashboard
+              </Link>
+            )}
             {session ? (
               <>
                 <span className="block py-2 text-orange normal-case text-xs">
-                  {getDisplayName(session.email)}
+                  {session.displayName}
                 </span>
                 <button
                   onClick={() => { handleLogout(); setMenuOpen(false); }}

@@ -2,27 +2,36 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import EventCard from "@/components/EventCard";
-import { events } from "@/data/events";
-import { musicians } from "@/data/musicians";
-import { nonprofits } from "@/data/nonprofits";
-import { bookings, impactPool } from "@/data/bookings";
+import { getEvents } from "@/lib/db/events";
+import { getMusicians } from "@/lib/db/musicians";
+import { getNonprofits } from "@/lib/db/nonprofits";
+import { getImpactPoolSummary } from "@/lib/db/impact";
+import { getServerSession } from "@/lib/supabase/server";
 
-export default function HomePage() {
-  // Show only upcoming events in the feed, sorted soonest first
-  const upcomingEvents = events
-    .filter((e) => e.status === "upcoming")
-    .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+export default async function HomePage() {
+  const [session, upcomingEvents, allMusicians, allNonprofits, impactPool] = await Promise.all([
+    getServerSession(),
+    getEvents({ status: "upcoming" }),
+    getMusicians(),
+    getNonprofits(),
+    getImpactPoolSummary(),
+  ]);
+
+  // Sort events by date_time ascending
+  const sortedEvents = [...upcomingEvents].sort(
+    (a, b) => new Date(a.date_time).getTime() - new Date(b.date_time).getTime()
+  );
 
   // Feature the first 3 musicians
-  const featuredMusicians = musicians.slice(0, 3);
+  const featuredMusicians = allMusicians.slice(0, 3);
 
-  // Quick community stats derived from seed data
-  const totalRsvps = events.reduce((sum, e) => sum + e.rsvpCount, 0);
-  const confirmedBookings = bookings.filter((b) => b.status === "confirmed" || b.status === "completed").length;
+  // Quick community stats derived from DB data
+  const totalRsvps = upcomingEvents.reduce((sum, e) => sum + e.rsvp_count, 0);
+  const confirmedBookingsCount = 0; // will be populated once bookings are user-specific
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar initialSession={session} />
 
       <main className="flex-1">
 
@@ -33,14 +42,14 @@ export default function HomePage() {
               src="/images/icons/austin_skyline_icon.png"
               alt=""
               aria-hidden="true"
-              className="h-20 w-auto hidden sm:block flex-shrink-0 self-center object-contain"
+              className="h-20 w-auto hidden sm:block shrink-0 self-center object-contain"
             />
             <div className="flex flex-col justify-center">
               <h1 className="font-display text-5xl sm:text-6xl uppercase text-azure mb-2">
                 Welcome Home
               </h1>
               <p className="font-heading text-sienna text-lg">
-                Austin's festival community bulletin board — music, impact, and the people making it happen.
+                Austin&apos;s festival community bulletin board — music, impact, and the people making it happen.
               </p>
             </div>
           </div>
@@ -50,7 +59,7 @@ export default function HomePage() {
         <div className="bg-azure text-white">
           <div className="max-w-7xl mx-auto px-4 py-6 flex flex-wrap gap-8 justify-center sm:justify-start">
             <div className="flex flex-col items-center sm:items-start">
-              <span className="impact-number text-4xl">{upcomingEvents.length}</span>
+              <span className="impact-number text-4xl">{sortedEvents.length}</span>
               <span className="font-heading font-semibold text-xs uppercase tracking-widest text-blue-200 mt-1">
                 Upcoming Events
               </span>
@@ -62,7 +71,7 @@ export default function HomePage() {
               </span>
             </div>
             <div className="flex flex-col items-center sm:items-start">
-              <span className="impact-number text-4xl">{musicians.length}</span>
+              <span className="impact-number text-4xl">{allMusicians.length}</span>
               <span className="font-heading font-semibold text-xs uppercase tracking-widest text-blue-200 mt-1">
                 Local Artists
               </span>
@@ -74,7 +83,7 @@ export default function HomePage() {
               </span>
             </div>
             <div className="flex flex-col items-center sm:items-start">
-              <span className="impact-number text-4xl">{confirmedBookings}</span>
+              <span className="impact-number text-4xl">{confirmedBookingsCount}</span>
               <span className="font-heading font-semibold text-xs uppercase tracking-widest text-blue-200 mt-1">
                 Active Bookings
               </span>
@@ -96,23 +105,23 @@ export default function HomePage() {
                 Upcoming Events
               </h2>
             </div>
-            <Link href="/events" className="btn-secondary !py-2 !px-5 text-sm">
+            <Link href="/events" className="btn-secondary py-2! px-5! text-sm">
               View All
             </Link>
           </div>
 
-          {upcomingEvents.length === 0 ? (
+          {sortedEvents.length === 0 ? (
             <p className="font-body text-gray-500 text-center py-12">
               No upcoming events right now — check back soon.
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event) => (
+              {sortedEvents.map((event) => (
                 <EventCard
                   key={event.id}
                   event={event}
-                  nonprofit={nonprofits.find((np) => np.id === event.nonprofitId)}
-                  musician={event.musicianId ? musicians.find((m) => m.id === event.musicianId) : null}
+                  nonprofit={allNonprofits.find((np) => np.id === event.nonprofit_id)}
+                  musician={event.musician_id ? allMusicians.find((m) => m.id === event.musician_id) ?? null : null}
                 />
               ))}
             </div>
@@ -138,7 +147,7 @@ export default function HomePage() {
                 Featured Artists
               </h2>
             </div>
-            <Link href="/musicians" className="btn-secondary !py-2 !px-5 text-sm">
+            <Link href="/musicians" className="btn-secondary py-2! px-5! text-sm">
               Browse All
             </Link>
           </div>
@@ -149,7 +158,7 @@ export default function HomePage() {
                 {/* Photo */}
                 <div className="flex justify-center">
                   <img
-                    src={musician.photoUrl}
+                    src={musician.photo_url ?? "/images/icons/musician_profile_window_icon.png"}
                     alt={musician.name}
                     className="h-20 w-20 object-contain"
                   />
@@ -178,18 +187,27 @@ export default function HomePage() {
                     ${musician.rate}
                   </span>
                   <span className="font-body text-sm text-gray-500 ml-1">
-                    {musician.rateType === "hourly" ? "/ hr" : "/ event"}
+                    {musician.rate_type === "hourly" ? "/ hr" : "/ event"}
                   </span>
                 </p>
 
                 {/* CTA */}
                 <div className="mt-auto pt-2">
-                  <Link
-                    href={`/book/${musician.id}`}
-                    className="btn-primary block text-center !py-2 !px-4 text-sm"
-                  >
-                    Book Now
-                  </Link>
+                  {session?.role === 'community' ? (
+                    <Link
+                      href={`/book/${musician.id}`}
+                      className="btn-primary block text-center py-2! px-4! text-sm"
+                    >
+                      Book Now
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/musicians/${musician.id}`}
+                      className="btn-primary block text-center py-2! px-4! text-sm"
+                    >
+                      View Profile
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}
@@ -221,10 +239,10 @@ export default function HomePage() {
 
           {/* Logo row */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
-            {nonprofits.map((np) => (
+            {allNonprofits.map((np) => (
               <a
                 key={np.id}
-                href={np.website}
+                href={np.website ?? "#"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex flex-col items-center gap-3 hover:scale-105 transition-transform"
@@ -232,7 +250,7 @@ export default function HomePage() {
               >
                 <div className="h-14 w-14 flex items-center justify-center">
                   <img
-                    src={np.logoUrl}
+                    src={np.logo_url ?? "/images/icons/hands_heart_window_icon.png"}
                     alt={np.name}
                     className="max-h-full max-w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
                   />
@@ -276,9 +294,11 @@ export default function HomePage() {
                 <Link href="/musicians" className="btn-secondary">
                   Find a Musician
                 </Link>
-                <Link href="/dashboard" className="btn-secondary">
-                  My Dashboard
-                </Link>
+                {session && (
+                  <Link href="/dashboard" className="btn-secondary">
+                    My Dashboard
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -286,7 +306,7 @@ export default function HomePage() {
 
       </main>
 
-      <Footer />
+      <Footer isLoggedIn={!!session} />
     </div>
   );
 }

@@ -4,10 +4,11 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import GenreTags from "@/components/GenreTags";
-import { events } from "@/data/events";
-import { nonprofits } from "@/data/nonprofits";
-import { musicians } from "@/data/musicians";
+import RsvpButton from "@/components/RsvpButton";
+import { getEventById } from "@/lib/db/events";
+import { getUserRsvp } from "@/lib/db/rsvps";
 import { formatDate, formatTime } from "@/lib/format";
+import { getServerSession } from "@/lib/supabase/server";
 
 export default async function EventDetailPage({
   params,
@@ -16,17 +17,19 @@ export default async function EventDetailPage({
 }) {
   const { id } = await params;
 
-  const event = events.find((e) => e.id === id);
+  const [session, event] = await Promise.all([
+    getServerSession(),
+    getEventById(id),
+  ]);
   if (!event) notFound();
 
-  const nonprofit = nonprofits.find((np) => np.id === event.nonprofitId);
-  const musician = event.musicianId
-    ? musicians.find((m) => m.id === event.musicianId)
-    : null;
+  const nonprofit = event.nonprofits;
+  const musician = event.musicians;
+  const userRsvp = session ? await getUserRsvp(id, session.userId) : null;
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar initialSession={session} />
 
       <main className="flex-1">
         {/* Hero */}
@@ -62,7 +65,7 @@ export default async function EventDetailPage({
                   />
                 </svg>
                 <span>
-                  {formatDate(event.dateTime)} &middot; {formatTime(event.dateTime)}
+                  {formatDate(event.date_time)} &middot; {formatTime(event.date_time)}
                 </span>
               </div>
               <div className="flex items-start gap-2">
@@ -91,7 +94,7 @@ export default async function EventDetailPage({
 
             {/* Badges */}
             <div className="flex items-center gap-2 mt-6">
-              <span className="text-sm font-heading font-semibold text-orange">{event.genrePref}</span>
+              <span className="text-sm font-heading font-semibold text-orange">{event.genre_pref}</span>
               <span className="text-orange/50 font-bold">|</span>
               <span className="text-sm font-heading font-semibold text-orange">{event.cause}</span>
               {event.status === "completed" && (
@@ -109,8 +112,18 @@ export default async function EventDetailPage({
 
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4">
-            <button type="button" className="btn-primary" aria-label="RSVP for this event (demo)">RSVP Now</button>
-            {musician && (
+            {session ? (
+              <RsvpButton
+                eventId={event.id}
+                initialRsvped={!!userRsvp}
+                isLoggedIn={true}
+              />
+            ) : (
+              <Link href="/login" className="btn-primary inline-block">
+                Log In to RSVP
+              </Link>
+            )}
+            {session && (
               <Link
                 href={`/sponsor/${event.id}`}
                 className="btn-secondary inline-block"
@@ -137,7 +150,7 @@ export default async function EventDetailPage({
                 />
               </svg>
               <span>
-                <span className="font-semibold text-gray-800">{event.rsvpCount}</span> RSVPs
+                <span className="font-semibold text-gray-800">{event.rsvp_count}</span> RSVPs
               </span>
             </div>
             <div className="flex items-center gap-2 font-body text-gray-600">
@@ -157,7 +170,7 @@ export default async function EventDetailPage({
               <span>
                 Expected:{" "}
                 <span className="font-semibold text-gray-800">
-                  {event.expectedAttendance}
+                  {event.expected_attendance}
                 </span>{" "}
                 attendees
               </span>
@@ -187,7 +200,7 @@ export default async function EventDetailPage({
               <div className="flex items-start gap-4">
                 <div className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-sand-light border border-sand-dark">
                   <Image
-                    src={nonprofit.logoUrl}
+                    src={nonprofit.logo_url ?? "/images/icons/hands_heart_window_icon.png"}
                     alt={`${nonprofit.name} logo`}
                     fill
                     className="object-contain p-1"
@@ -201,27 +214,29 @@ export default async function EventDetailPage({
                   <p className="font-body text-sm text-gray-600 mt-1 leading-relaxed">
                     {nonprofit.bio}
                   </p>
-                  <a
-                    href={nonprofit.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 mt-3 text-sm font-heading font-semibold text-azure hover:text-sienna transition-colors"
-                  >
-                    Visit Website
-                    <svg
-                      className="w-3.5 h-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  {nonprofit.website && (
+                    <a
+                      href={nonprofit.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-3 text-sm font-heading font-semibold text-azure hover:text-sienna transition-colors"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                      />
-                    </svg>
-                  </a>
+                      Visit Website
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -237,7 +252,7 @@ export default async function EventDetailPage({
               <div className="flex items-start gap-4">
                 <div className="w-20 h-20 shrink-0">
                   <img
-                    src={musician.photoUrl}
+                    src={musician.photo_url ?? "/images/icons/musician_profile_window_icon.png"}
                     alt={musician.name}
                     className="w-full h-full object-contain"
                   />
@@ -326,7 +341,7 @@ export default async function EventDetailPage({
         </div>
       </main>
 
-      <Footer />
+      <Footer isLoggedIn={!!session} />
     </div>
   );
 }

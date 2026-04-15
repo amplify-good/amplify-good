@@ -1,148 +1,107 @@
-# Amplify Good — Developer README
+# Amplify Good App
 
-Frontend-only Next.js prototype for the Amplify Good three-sided marketplace.
+Supabase-backed Next.js application for the Amplify Good marketplace connecting musicians, nonprofits, and community members.
 
 ## Stack
 
-| Layer | Technology |
-| ----- | ---------- |
-| Framework | Next.js 16 (App Router) |
-| Styling | Tailwind CSS 4 with `@theme inline` CSS tokens |
-| Language | TypeScript |
-| Auth | Cookie-based demo auth via `js-cookie` |
-| Fonts | Anton, League Spartan, Open Sans (Google Fonts) |
-| Data | Static TypeScript seed files — no database |
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Supabase Auth + Postgres + Row Level Security
+- Vitest + Testing Library
 
-## Setup
+## Local Setup
+
+1. Install dependencies:
 
 ```bash
-npm install
-npm run dev
+pnpm install
+```
+
+2. Create `/.env.local` from `/.env.local.example` and fill in:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ADMIN_EMAILS=admin@example.com
+```
+
+3. Run the app:
+
+```bash
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Project Structure
+## Supabase Setup
 
-```text
-src/
-  app/                  # Next.js App Router pages
-    page.tsx            # / — Landing
-    login/page.tsx      # /login
-    signup/page.tsx     # /signup
-    home/page.tsx       # /home — Community feed
-    musicians/
-      page.tsx          # /musicians — Directory
-      [id]/page.tsx     # /musicians/:id — Profile
-    events/
-      page.tsx          # /events — Listing
-      new/page.tsx      # /events/new — Create event
-      [id]/page.tsx     # /events/:id — Detail
-    dashboard/page.tsx  # /dashboard — Role dashboard
-    book/[id]/page.tsx  # /book/:id — Booking + checkout
-    sponsor/[id]/page.tsx # /sponsor/:id — Sponsor a set
-    admin/page.tsx      # /admin — Admin panel
-    globals.css         # Tailwind 4 + design tokens + base styles
-    layout.tsx          # Root layout (fonts, metadata)
-  components/
-    Navbar.tsx          # Sticky nav with session-aware login/logout
-    Footer.tsx          # Site footer
-    GenreTags.tsx       # Pipe-separated genre display
-    SectionDivider.tsx  # Decorative section separator
-  data/
-    musicians.ts        # 5 musician records
-    nonprofits.ts       # 5 nonprofit records
-    events.ts           # 7 event records
-    bookings.ts         # 9 booking records + impactPool object
-  lib/
-    auth.ts             # Cookie auth — login, logout, getSession, getDisplayName
-    format.ts           # Shared utilities — formatDate, formatTime, formatMoney
-public/
-  images/
-    fist-logo.png       # Primary logo (microphone fist)
-    icons/              # Hand-drawn brand illustration kit
-    musicians/          # Musician placeholder photos
-    nonprofits/         # Nonprofit logo placeholders
+Create a hosted Supabase project, then run the SQL migrations in order from [`supabase/migrations`](/Users/andychuong/Documents/SB/Amplify_good/amplify-good-app/supabase/migrations):
+
+1. `001_profiles.sql`
+2. `002_musicians.sql`
+3. `003_nonprofits.sql`
+4. `004_events.sql`
+5. `005_rsvps.sql`
+6. `006_bookings.sql`
+7. `007_impact_pool.sql`
+8. `008_indexes.sql`
+9. `009_rls_policies.sql`
+
+After migrations, seed demo data in this order:
+
+```bash
+pnpm seed:auth-demo
+pnpm seed:app-demo
 ```
 
-## Authentication
+Use [`supabase/reset_demo.sql`](/Users/andychuong/Documents/SB/Amplify_good/amplify-good-app/supabase/reset_demo.sql) if you want to clear the seeded marketplace records, and [`supabase/cleanup_broken_auth_seed.sql`](/Users/andychuong/Documents/SB/Amplify_good/amplify-good-app/supabase/cleanup_broken_auth_seed.sql) only if you need to clean up an older broken auth seed from before the service-role seeder existed.
 
-No real auth — uses `js-cookie` to store two cookies: `ampgood_role` and `ampgood_email`.
+## Auth Notes
 
-**`src/lib/auth.ts`** exports:
+- Enable the Email provider in Supabase Authentication.
+- The current signup flow expects immediate session creation after `signUp()`.
+- For this codebase, keep email confirmation off unless you also implement a confirmation callback flow.
 
-- `login(email)` — checks email against hardcoded map, sets cookies, returns role or null
-- `logout()` — removes both cookies
-- `getSession()` — reads cookies, returns `{ role, email }` or null
-- `getDisplayName(email)` — maps email to display name
+## Demo Accounts
 
-Demo accounts (any password):
+After running both seed scripts, these accounts work with password auth:
 
-| Email | Role | Display Name |
-| ----- | ---- | ------------ |
-| `music@gmail.com` | musician | Los Topo Chicos |
-| `npo@gmail.com` | nonprofit | Austin Food Bank |
-| `fan@gmail.com` | community | Rachel Torres |
-| `event@gmail.com` | community | David Chen |
+- `music@gmail.com` / `password123`
+- `npo@gmail.com` / `password123`
+- `fan@gmail.com` / `password123`
+- `event@gmail.com` / `password123`
 
-The Navbar reads the session via `getSession()` on mount and shows the user's display name + logout button when logged in.
+## Admin Access
 
-## Seed Data
+`/admin` is protected by `ADMIN_EMAILS`, a comma-separated allowlist of email addresses. Any signed-in user not on that list is redirected to `/home`.
 
-All data lives in `src/data/`. No database, no API calls — everything is imported directly into pages.
+## Commands
 
-- **`musicians.ts`** — 5 musicians with id, name, genre, rate, bio, media, socials
-- **`nonprofits.ts`** — 5 nonprofits with id, name, mission, cause, logo
-- **`events.ts`** — 7 events with status (upcoming/draft/completed), musicianId, nonprofitId
-- **`bookings.ts`** — 9 bookings covering all 5 musicians; also exports `impactPool` object
-
-Impact pool shape:
-
-```typescript
-export const impactPool = {
-  balance: 685,
-  totalInflows: 1835,
-  totalOutflows: 1150,
-};
+```bash
+pnpm dev
+pnpm build
+pnpm test
+pnpm seed:auth-demo
+pnpm seed:app-demo
 ```
-
-## Design Tokens
-
-CSS custom properties defined in `globals.css` and exposed via `@theme inline`:
-
-```css
---color-azure: #21639F       /* Primary brand */
---color-sienna: #BF5700      /* Secondary accent */
---color-orange: #FFB700      /* Action buttons */
---color-gold: #FBB03B        /* Impact numbers */
---color-sand: #E8DCBE        /* Page background */
---color-sand-light: #F2EADA
---color-sand-dark: #D9CCAB
---color-parchment: #E3D7BA
-```
-
-Use as Tailwind utilities: `bg-azure`, `text-orange`, `border-gold`, etc.
-
-## Shared Utilities
-
-**`src/lib/format.ts`**:
-
-- `formatDate(dateString)` — e.g. `"June 14, 2026"`
-- `formatTime(dateString)` — e.g. `"6:00 PM"`
-- `formatMoney(amount)` — e.g. `"$1,835.00"`
-
-## Static Generation
-
-Pages with dynamic routes (`/musicians/[id]`, `/events/[id]`, `/book/[id]`, `/sponsor/[id]`) use `generateStaticParams()` to export all routes at build time.
 
 ## Deployment
 
-Deploy to Vercel. Set the **Root Directory** to `amplify-good-app` in the Vercel project settings (the monorepo root is not the Next.js app).
+Deploy to Vercel with:
 
-```text
-Root Directory: amplify-good-app
-Build Command:  npm run build  (default)
-Output:         .next          (default)
-```
+- Root Directory: `amplify-good-app`
+- Environment Variables:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+  - `ADMIN_EMAILS`
 
-No environment variables required — this is a fully static frontend prototype.
+## Current Behavior
+
+- Musician and nonprofit signup now creates the matching role record immediately after auth signup.
+- Community signup routes to `/home`.
+- Musician and nonprofit signup routes to `/dashboard`.
+- Server actions and dashboards use Supabase-backed sessions rather than demo cookies.

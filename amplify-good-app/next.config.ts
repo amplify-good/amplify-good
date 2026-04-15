@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Removed output: 'export' — app now requires Node.js runtime for Supabase
 };
 
 export default nextConfig;

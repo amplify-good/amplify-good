@@ -1,10 +1,11 @@
+import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { musicians } from "@/data/musicians";
-import { nonprofits } from "@/data/nonprofits";
-import { events } from "@/data/events";
-import { bookings, impactPool } from "@/data/bookings";
-
+import { getMusicians } from "@/lib/db/musicians";
+import { getNonprofits } from "@/lib/db/nonprofits";
+import { getEvents } from "@/lib/db/events";
+import { getImpactPoolSummary, getImpactTransactions } from "@/lib/db/impact";
+import { getServerSession } from "@/lib/supabase/server";
 import { formatDate, formatMoney } from "@/lib/format";
 
 // ─── Status text color ──────────────────────────────────────────────────────
@@ -30,10 +31,32 @@ function statusColor(status: string): string {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/login");
+  }
+
+  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (!adminEmails.includes(session.email.toLowerCase())) {
+    redirect("/home");
+  }
+
+  const [musicians, nonprofits, allEvents, impactSummary, transactions] = await Promise.all([
+    getMusicians(),
+    getNonprofits(),
+    getEvents(), // excludes drafts by default
+    getImpactPoolSummary(),
+    getImpactTransactions(20),
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      <Navbar initialSession={session} />
 
       <main className="flex-1">
         {/* Page Header */}
@@ -43,7 +66,7 @@ export default function AdminPage() {
               Admin Panel
             </h1>
             <p className="font-body text-gray-500 mt-1 text-sm">
-              Seed data overview &mdash; read-only demo
+              Live DB overview &mdash; read-only
             </p>
           </div>
         </div>
@@ -61,7 +84,7 @@ export default function AdminPage() {
                   Current Balance
                 </p>
                 <p className="impact-number text-gold text-3xl">
-                  {formatMoney(impactPool.balance)}
+                  {formatMoney(impactSummary.balance)}
                 </p>
               </div>
               <div className="card text-left">
@@ -69,7 +92,7 @@ export default function AdminPage() {
                   Total Inflows
                 </p>
                 <p className="impact-number text-turquoise text-3xl">
-                  {formatMoney(impactPool.totalInflows)}
+                  {formatMoney(impactSummary.totalInflows)}
                 </p>
               </div>
               <div className="card text-left">
@@ -77,7 +100,7 @@ export default function AdminPage() {
                   Total Outflows
                 </p>
                 <p className="impact-number text-sienna text-3xl">
-                  {formatMoney(impactPool.totalOutflows)}
+                  {formatMoney(impactSummary.totalOutflows)}
                 </p>
               </div>
             </div>
@@ -126,64 +149,61 @@ export default function AdminPage() {
             </div>
           </section>
 
-          {/* ── Recent Bookings ──────────────────────────────────────────────── */}
+          {/* ── Recent Impact Transactions ───────────────────────────────────── */}
           <section>
             <h2 className="font-heading text-xl font-bold text-azure uppercase tracking-wide mb-4 pb-2 border-b-2 border-sand-dark">
-              Recent Bookings
+              Recent Impact Transactions
             </h2>
-            <div className="card p-0 overflow-x-auto">
-              <table className="w-full text-left text-sm font-body">
-                <thead>
-                  <tr className="border-b border-sand-dark bg-parchment">
-                    <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
-                      Event Name
-                    </th>
-                    <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
-                      Musician
-                    </th>
-                    <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
-                      Community Member
-                    </th>
-                    <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
-                      Amount
-                    </th>
-                    <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((booking, idx) => {
-                    const musician = musicians.find((m) => m.id === booking.musicianId);
-                    const isLast = idx === bookings.length - 1;
-                    return (
-                      <tr
-                        key={booking.id}
-                        className={`${!isLast ? "border-b border-sand-dark" : ""} hover:bg-sand transition-colors`}
-                      >
-                        <td className="px-5 py-3 font-semibold text-gray-800">
-                          {booking.eventName}
-                        </td>
-                        <td className="px-5 py-3 text-gray-700">
-                          {musician?.name ?? <span className="text-gray-400 italic">Unknown</span>}
-                        </td>
-                        <td className="px-5 py-3 text-gray-700">
-                          {booking.communityMemberName}
-                        </td>
-                        <td className="px-5 py-3 font-bold text-gold">
-                          {formatMoney(booking.totalCharged)}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className={`font-heading font-semibold uppercase text-xs tracking-wide ${statusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {transactions.length === 0 ? (
+              <p className="font-body text-sm text-gray-400 italic">No transactions yet.</p>
+            ) : (
+              <div className="card p-0 overflow-x-auto">
+                <table className="w-full text-left text-sm font-body">
+                  <thead>
+                    <tr className="border-b border-sand-dark bg-parchment">
+                      <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
+                        Description
+                      </th>
+                      <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
+                        Amount
+                      </th>
+                      <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
+                        Type
+                      </th>
+                      <th className="font-heading font-bold uppercase text-xs text-gray-500 tracking-wide px-5 py-3">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transactions.map((tx, idx) => {
+                      const isLast = idx === transactions.length - 1;
+                      return (
+                        <tr
+                          key={tx.id}
+                          className={`${!isLast ? "border-b border-sand-dark" : ""} hover:bg-sand transition-colors`}
+                        >
+                          <td className="px-5 py-3 text-gray-700">
+                            {tx.description ?? <span className="text-gray-400 italic">—</span>}
+                          </td>
+                          <td className="px-5 py-3 font-bold text-gold">
+                            {formatMoney(tx.amount)}
+                          </td>
+                          <td className="px-5 py-3">
+                            <span className={`font-heading font-semibold uppercase text-xs tracking-wide ${tx.type === "inflow" ? "text-turquoise" : "text-sienna"}`}>
+                              {tx.type}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 text-gray-500 text-xs">
+                            {formatDate(tx.created_at)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
           {/* ── Events Overview ──────────────────────────────────────────────── */}
@@ -192,9 +212,9 @@ export default function AdminPage() {
               Events Overview
             </h2>
             <div className="space-y-3">
-              {events.map((ev) => {
-                const musician = ev.musicianId
-                  ? musicians.find((m) => m.id === ev.musicianId)
+              {allEvents.map((ev) => {
+                const musician = ev.musician_id
+                  ? musicians.find((m) => m.id === ev.musician_id)
                   : null;
                 return (
                   <div
@@ -206,7 +226,7 @@ export default function AdminPage() {
                         {ev.name}
                       </h3>
                       <p className="font-body text-sm text-gray-500">
-                        {formatDate(ev.dateTime)} &mdash; {ev.venue}
+                        {formatDate(ev.date_time)} &mdash; {ev.venue}
                       </p>
                     </div>
                     <div className="flex items-center gap-6 text-sm shrink-0">
@@ -242,7 +262,7 @@ export default function AdminPage() {
         </div>
       </main>
 
-      <Footer />
+      <Footer isLoggedIn={!!session} />
     </div>
   );
 }

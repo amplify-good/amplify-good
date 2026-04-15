@@ -1,9 +1,16 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { getServerSession } from "@/lib/supabase/server";
 import SignUpForm from "./SignUpForm";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export default function SignUpPage() {
+export default async function SignUpPage() {
+  const session = await getServerSession();
+  if (session) {
+    redirect(session.role === "community" ? "/home" : "/dashboard");
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
